@@ -4,6 +4,7 @@ author: "Florent Bédécarrats"
 date: '2023-06-05'
 format:
   html:
+    output-file: index.htm
     code-fold: true
     toc: true
 editor: visual

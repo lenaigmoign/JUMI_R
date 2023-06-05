@@ -19,32 +19,30 @@ library(wdpar)
 #TELECHARGEMENT DES DONNEES DU WDPA 
 WDPA_Senegal <- wdpa_fetch("Senegal", wait = TRUE, 
                           download_dir = "data/WDPA")
-#CHARGEMENT DU CONTOUR 
-contour_senegal <- gadm(country = "Senegal", resolution = 1, path = "data/GADM") %>%
-st_as_sf()
-save(contour_senegal, file = "data/contour_senegal.rds")
 
-#CHARGEMENT DES DONNEES DU WDPA #NON FONCTIONNEL 
-WDPA_Senegal <- wdpa_read("C:/Users/Lenaig MOIGN/Documents/R/AP_Senegal/data/WDPA/WDPA_Jun2023_SEN-shapefile.zip")
-AP_Senegal <- c("C:/Users/Lenaig MOIGN/Documents/R/AP_Senegal/data/WDPA/WDPA_Jun2023_SEN-shapefile/WDPA_WDOECM_Jun2023_Public_SEN_shp_0/WDPA_WDOECM_Jun2023_Public_SEN_shp-polygons.shp",
-                "C:/Users/Lenaig MOIGN/Documents/R/AP_Senegal/data/WDPA/WDPA_Jun2023_SEN-shapefile/WDPA_WDOECM_Jun2023_Public_SEN_shp_1/WDPA_WDOECM_Jun2023_Public_SEN_shp-polygons.shp",
-                "C:/Users/Lenaig MOIGN/Documents/R/AP_Senegal/data/WDPA/WDPA_Jun2023_SEN-shapefile/WDPA_WDOECM_Jun2023_Public_SEN_shp_2/WDPA_WDOECM_Jun2023_Public_SEN_shp-polygons.shp")
-for (i in 1:length(AP_Senegal)) { 
-  AP_Senegal_sf <- st_read(AP_Senegal[i])
-  st_write(AP_Senegal_sf, paste0("AP_Senegal", i, ".shp"))
-}
+#ON VA REGARDER QUELS TYPES DE GEOMETRIES
+WDPA_Senegal %>%
+  mutate(geom_type = st_geometry_type(.)) %>%
+  group_by(geom_type) %>%
+  summarise(n = n()) 
 
+crs(WDPA_Senegal)
 
-#APRES FUSION SUR QGIS
-WDPA_Senegal <- wdpa_read("C:/Users/Lenaig MOIGN/Documents/R/AP_Senegal/data/WDPA/WDPA_Jun2023_SEN-shapefile.zip")
-AP_Senegal_of <- st_read("C:/Users/Lenaig MOIGN/Documents/R/AP_Senegal/AP_Senegal/AP_Senegal_of.shp")
+AP_Annees <- WDPA_Senegal %>%
+  filter(st_geometry_type(.) == "MULTIPOLYGON") %>% 
+  mutate(GIS_AREA= st_area(.), 
+         GIS_AREA= units::set_units(GIS_AREA, "km2"))%>% 
+  group_by(STATUS_YR) %>%
+  summarise(n = n(),
+            area = sum(GIS_AREA)) %>%
+  arrange(STATUS_YR)
 
 
 #RENDU CARTO 
 tmap_mode(mode = "view")
-tm_shape(contour_senegal) +
-tm_borders() + 
-tm_shape(AP_Senegal_of) + 
+#tm_shape(contour_senegal) +
+#tm_borders() + 
+tm_shape(WDPA_Senegal) + 
 tm_polygons(col = "IUCN_CAT", alpha = 0.6, title = "Catégorie IUCN",
             id = "NAME", 
             popup.vars = c("Type" = "DESIG", 
@@ -53,6 +51,7 @@ tm_polygons(col = "IUCN_CAT", alpha = 0.6, title = "Catégorie IUCN",
                             "Année du statut" = "STATUS_YR"))
 #ADITIONAL OPTIONS 
 tmap_options(check.and.fix = TRUE)
+
 
 
 #VERIFIER LES VALEURS MANQUANTES 

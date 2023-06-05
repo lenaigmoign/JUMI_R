@@ -1,0 +1,101 @@
+---
+title: "Journées de l'UMI SOURCE"
+author: "Lenaïg MOIGN, Florent Bédécarrats"
+format:
+  html:
+    output-file: "index"
+    output-ext: "htm"
+    code-fold: true
+    toc: true
+editor: visual
+execute:
+  warning: false
+  error: false
+  
+---
+
+## CHARGEMENT DES LIBRAIRIES 
+
+gjeheuzknnzoe
+
+
+
+```{r}
+librairies_req <- c("tidyverse","readxl","writexl",                   
+                  "sf","wdpar","tmap","geodata","tidygeocoder","maptiles", "mapme.biodiversity")
+manquantes <- !(librairies_req %in% installed.packages())
+if (any(manquantes)) install.packages(librairies_req[manquantes])
+  
+#CHARGEMENT DES LIBRAIRIES
+library(tidyverse)
+library(geodata)
+library(sf)
+library(tmap)
+library(wdpar)
+```
+
+
+
+## CHARGEMENT DES DONNEES 
+
+fgrgrht
+
+```{r}
+#TELECHARGEMENT DES DONNEES DU WDPA 
+WDPA_Senegal <- wdpa_fetch("Senegal", wait = TRUE, 
+                          download_dir = "data/WDPA")
+
+
+```
+
+
+## EXPLORATION DE DONNEES
+
+blabejngef
+
+```{r}
+WDPA_Senegal %>%
+  mutate(geom_type = st_geometry_type(.)) %>%
+  group_by(geom_type) %>%
+  summarise(n = n()) 
+```
+
+
+bzjzo^zk ze
+
+```{r}
+AP_Annees <- WDPA_Senegal %>%
+  filter(st_geometry_type(.) == "MULTIPOLYGON") %>% 
+  mutate(GIS_AREA= st_area(.), 
+         GIS_AREA= units::set_units(GIS_AREA, "km2"))%>% 
+  group_by(STATUS_YR) %>%
+  summarise(n = n(),
+            area = sum(GIS_AREA)) %>%
+  arrange(STATUS_YR)
+```
+
+
+
+rtjnltr 
+
+## CARTE 
+
+```{r}
+tmap_mode(mode = "view")
+#tm_shape(contour_senegal) +
+#tm_borders() + 
+tm_shape(WDPA_Senegal) + 
+tm_polygons(col = "IUCN_CAT", alpha = 0.6, title = "Catégorie IUCN",
+            id = "NAME", 
+            popup.vars = c("Type" = "DESIG", 
+                            "Catégorie IUCN" = "IUCN_CAT",
+                            "Surface déclarée" = "REP_AREA",
+                            "Année du statut" = "STATUS_YR"))
+```
+
+
+## ACQUISITION DE DONNEES ET CALCUL D'INDICATEURS
+
+
+
+
