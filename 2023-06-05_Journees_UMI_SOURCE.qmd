@@ -5,13 +5,13 @@ format:
   html:
     output-file: "index"
     output-ext: "htm"
-    code-fold: true
     toc: true
 editor: visual
 execute:
   warning: false
   error: false
-  
+
+
 ---
 
 ## CHARGEMENT DES LIBRAIRIES 
