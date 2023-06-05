@@ -1,2 +1,3 @@
-# JUMI_R
+# POUR JUMI_R
 Initiation R pour JUMI SOURCE
+
