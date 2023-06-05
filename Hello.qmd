@@ -27,27 +27,20 @@ On cherche à savoir si l'aire protégée de la Somone a eu un **impact signific
 Pour faire toutes les analyses nécessaires, il faut charger différentes libraires dans *R studio* et notamment le **package mapme.biodiversity** pour accéder aux données environnementales du *Global Mangrove Watch*
 
 ```{r Installation et chargement des librairies requises}
-# # Le package est en cours de développement, toujours installer la version en cours
-remotes::install_github("mapme-initiative/mapme.biodiversity", upgrade = "always")
 
-librairies_req <- c("tidyverse","readxl","writexl","cowplot",
-              "gt","sf","wdpar","webdriver","tmap",
-                "geodata","tidygeocoder","maptiles",
-                "plm","broom","stargazer","MatchIt",
-                 "optmatch","rgee","did","cobalt")
-
+#AUTRES PACKAGES
+librairies_req <- c("tidyverse","readxl","writexl",                   
+                  "sf","wdpar","tmap","geodata","tidygeocoder","maptiles", "mapme.biodiversity")
 manquantes <- !(librairies_req %in% installed.packages())
 if (any(manquantes)) install.packages(librairies_req[manquantes])
-
+  
 #CHARGEMENT DES LIBRAIRIES
 library(tidyverse)
-library(lubridate)
+library(geodata)
 library(sf)
 library(tmap)
-library(geodata)
-library(cowplot)
-library(gt)
-library(wdpar) 
+library(wdpar)
+
 ```
 
 On va ensuite charger les données qui nous intéressent à savoir les données au Sénégal.

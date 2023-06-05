@@ -11,10 +11,7 @@ if (any(manquantes)) install.packages(librairies_req[manquantes])
   
 #CHARGEMENT DES LIBRAIRIES
 library(tidyverse)
-library(lubridate)
 library(geodata)
-library(cowplot)
-library(gt)
 library(sf)
 library(tmap)
 library(wdpar)
