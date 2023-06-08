@@ -13,9 +13,9 @@ execute:
   error: false
 ---
 
-## CHARGEMENT DES LIBRAIRIES
+## 1. INSTALLATION ET CHARGEMENT DES LIBRAIRIES R
 
-gjeheuzknnzoe
+*expliquer principe des librairies*
 
 ```{r}
 # INSTALLATION DES LIBRAIRIES R 
@@ -23,6 +23,7 @@ gjeheuzknnzoe
 librairies_req <- c("tidyverse",# Une série de packages pour faciliter la manipulation de données
                     "readxl", # Pour lire les fichiers excel (Carvalho et al. 2018)
                     "writexl",# Pour écrire des fichiers excel 
+                    "gt",# Pour produire de jolis tableaux
                     "sf", # Pour faciliter la manipulation de données géographiques
                     "maptiles", # Pour télécharger des fonds de carte 
                     "geodata", # Pour télécharger simplement les frontières administratives
@@ -31,21 +32,26 @@ librairies_req <- c("tidyverse",# Une série de packages pour faciliter la manip
                     "wdpar", # Pour télécharger la base d'aires protégées WDPA
                     "mapme.biodiversity") # Pour importer et analyser des indicateurs de biodiversité
 
-# CHARGEMENT DES LIBRAIRIES
+manquantes <- !(librairies_req %in% installed.packages())
+if (any(manquantes)) install.packages(librairies_req[manquantes])
+
+# CHARGEMENT DES LIBRAIRIES NECESSAIRES AUX PREMIERS TRAVAUX
 
 library(tidyverse)
 library(geodata)
 library(sf)
 library(tmap)
 library(wdpar)
+library(gt)
 
 ```
 
-## CHARGEMENT DES DONNEES
+## 2. CHARGEMENT DES DONNEES SUR LES AIRES PROTEGEES
 
-fgrgrht
+*expliquer initiative WDPA*
 
 ```{r}
+
 #TELECHARGEMENT DES DONNEES DU WDPA 
 
 WDPA_Senegal <- wdpa_fetch("Senegal", wait = TRUE, 
@@ -53,9 +59,27 @@ WDPA_Senegal <- wdpa_fetch("Senegal", wait = TRUE,
 
 ```
 
-## EXPLORATION DES DONNEES
+## 3. CHARGEMENT DES CONTOURS ADMINISTRATIFS 
 
-Quels types de géométrie ? Quel système de projection ?
+```{r}
+
+# On télécharge la version en ligne
+
+contour_senegal <- gadm(country = "Senegal", resolution = 1, level = 0,
+                     path = "data/GADM") %>%
+st_as_sf()
+
+# On charge la version disponible localement 
+
+save(contour_sen, file = "data/GADM/gadm/contour_sen.rds")
+str(contour_sen)
+
+```
+
+
+## 4. EXPLORATION DES DONNEES DISPONIBLES SUR LES AIRES PROTEGEES
+
+On charge de l'information géographique, il est important de connaître les caractéristiques de base des objets à savoir : Quels types de géométrie ? Quel système de projection ?
 
 ```{r}
 
@@ -72,11 +96,9 @@ crs(WDPA_Senegal)
 
 ```
 
-Pour aller plus loin : ajuster manuellement le système de projection
+Pour aller plus loin : ajuster manuellement le système de projection (code à venir)
 
-## EXPLORER LES DONNEES 
-
-# Connaître la nombre d'aires protégées et leur superficie totale par année de création 
+# Connaître le nombre d'aires protégées et leur superficie totale par année de création 
 
 ```{r}
 AP_Annees <- WDPA_Senegal %>%
@@ -90,7 +112,63 @@ AP_Annees <- WDPA_Senegal %>%
 
 ```
 
-# Connaître le nombre d'aires protégée par mandat présidentiel 
+Production d'un joli tableau à afficher dans un rapport : 
+
+**Erreur 1 : exclure la colonne géometrie dans le rendu final**
+
+```{r}
+
+AP_Annees %>%
+  select(-c('geometry')) %>%
+  gt() %>%
+  cols_label(STATUS_YR = "Année de création de l'aire protégée",n = "Effectif total",area = "Superficie en km²") %>%
+  tab_header("Synthèse du nombre et de la superficie totale des aires protégées par année de création") %>%
+  tab_source_note("Source : Données du WDPA (juin 2023)")
+
+```
+
+*lien vers tableau*
+
+# Série d'exercices d'exploration
+
+# Connaître les aires protégées créées en 2020 
+
+```{r}
+WDPA_Senegal %>% 
+filter(STATUS_YR == 2020) %>% 
+select(NAME, DESIG)  
+
+```
+
+# Connaître les aires protégées créées avant 1972 
+
+```{r}
+# CONNAITRE LES AIRES PROTEGEES CREES AVANT 1972 (ETAPE 1)
+
+WDPA_Senegal %>% 
+filter(STATUS_YR < 1972) %>% 
+select(NAME, DESIG) 
+
+# CONNAITRE LES AIRES PROTEGEES CREES AVANT 1972 (ETAPE 2) 
+# que celles dont on connaît l'année de création
+
+WDPA_Senegal %>% 
+  filter(STATUS_YR < 1972 & STATUS_YR != 0) %>% 
+  select(NAME, DESIG) 
+
+# CONNAITRE LES AIRES PROTEGEES CREES AVANT 1972 (ETAPE 3)
+#que les polygones 
+
+WDPA_Senegal %>% 
+  filter(STATUS_YR < 1972 & STATUS_YR != 0) %>% 
+  filter(st_geometry_type(.) == "MULTIPOLYGON") %>%
+  select(NAME, DESIG) 
+
+```
+
+# Connaître le nombre d'aires protégées par mandat présidentiel 
+
+**Erreur 2 : au niveau du tableau pour la mise en forme, la fonction cols_label(Periode="Mandat",Effectif_total="Nombre de création d'aires protégées",Président="Président") ne marche pas**
 
 ```{r}
 
@@ -111,23 +189,29 @@ AP_mandats <- WDPA_mandats %>%
   group_by(Periode) %>% # Groupement des données par période de création de l'aire protégée 
   summarise(Effectif_total = n()) %>%  # Calcul du nombre d'observations pour chaque année 
   arrange(Periode) %>% #Tri des données par ordre croissant
-  mutate(Nom = c("ABDOU DIOUF", "ABDOULAYE WADE", "MACKY SALL")) %>%
+  mutate(Nom = c("ABDOU DIOUF", "ABDOULAYE WADE", "MACKY SALL"))%>%
 
-# Création d'un beau tableau (ne fonctionne pas) 
-gt() %>%
+# Création d'un beau tableau (ERREUR) 
+
+AP_mandats %>%
+  gt() %>%
+  cols_label(Periode = "Mandat", Effectif_total = "Nombre de création d'aires protégées", Nom = "Président") %>%
   tab_header("Nombre de création d'aires protégées durant les derniers mandats présidentiels au Sénégal") %>%
-  tab_source_note("Source : Données du WDPA (juin 2023)")%>%
+  tab_source_note("Source : Données du WDPA (juin 2023)")
 
-#Difficultés pour renommer les colonnes
 
 ```
 
-## CONNAITRE LES DONNEES MANQUANTES
+
+## PARTIE GRAPHIQUE HISTORIQUE DES AIRES PROTEGEES
+
+
+## 5. CONNAITRE LES DONNEES MANQUANTES
 
 ```{r}
 # VERIFIER LES VALEURS MANQUANTES 
 
-AP_Senegal_of %>%
+WDPA_Senegal %>%
   st_drop_geometry() %>%
   summarise("Nombre total d'aires protégées" = n(),
             "Catégorie IUCN manquante" = sum(IUCN_CAT == "Not Reported"),
@@ -142,16 +226,16 @@ AP_Senegal_of %>%
 
 ```
 
-## VISUALER LES DONNEES GEOGRAPHIQUES 
+## 6. PRODUIRE DES CARTES
 
 # Carte 1 (Catégorie IUCN)
 
 ```{r}
-# RENDU CARTO
 
-tmap_mode(mode = "view")
-# tm_shape(contour_senegal) +
-# tm_borders() + 
+tmap_mode(mode = "view") 
+
+tm_shape(contour_senegal) +
+tm_borders() + 
 tm_shape(WDPA_Senegal) + 
 tm_polygons(col = "IUCN_CAT", alpha = 0.6, title = "Catégorie IUCN",
             id = "NAME", 
@@ -159,7 +243,6 @@ tm_polygons(col = "IUCN_CAT", alpha = 0.6, title = "Catégorie IUCN",
                             "Catégorie IUCN" = "IUCN_CAT",
                             "Surface déclarée" = "REP_AREA",
                             "Année du statut" = "STATUS_YR"))
-#ADITIONAL OPTIONS 
 
 tmap_options(check.and.fix = TRUE)
 
@@ -168,26 +251,62 @@ tmap_options(check.and.fix = TRUE)
 # Carte 2 (Catégorie d'aires protégées) 
 
 ```{r}
+
 tmap_mode(mode = "view") 
 tm_shape(contour_senegal) +
   tm_borders() + 
   tm_shape(WDPA_Senegal) + 
-  tm_polygons(col = "DESIG", alpha = 0.6, title = "Catégories d'aires protégées",
+  tm_polygons(col = "DESIG", alpha = 0.6, title = "Catégories d'aires protégées au Sénégal",
               id = "NAME", 
               popup.vars = c("Type" = "DESIG", 
                              "Catégorie IUCN" = "IUCN_CAT",
                              "Surface déclarée" = "REP_AREA",
                              "Année du statut" = "STATUS_YR"))
+tmap_options(check.and.fix = TRUE)
+
 ```
 
 # Carte 3 (Date de création)
 
-A VENIR
+**Erreur 3 :  les années sont enregistrées comme des nombres, idée de les enregistrer comme année et de faire 
+une légende avec valeur MIN et valeur MAX (dégradé de couleur entre les deux)**
+
+
+```{r}
+
+library(dplyr)
+library(lubridate)
+library(tmap)
+
+# On spécifie qu'il s'agit d'années pour la colonne STATUS_YR
+
+WDPA_Senegal_poly <- WDPA_Senegal %>% 
+  filter(STATUS_YR != 0)  %>% 
+  mutate(STATUS_YR = as.Date(STATUS_YR, origin = "1950-01-01"),
+        STATUS_YR = year(STATUS_YR)) 
+
+
+# Sur le rendu de la carte, une seule catégorie d'année apparaît 
+
+#tmap_mode(mode = "view") 
+#tm_shape(contour_senegal) +
+ # tm_borders() + 
+  #tm_shape(WDPA_Senegal_poly) + 
+  #tm_polygons(col = "STATUS_YR", alpha = 0.6, title = "Création d'aires protégées au Sénégal",
+              #id = "NAME", 
+              #popup.vars = c("Type" = "DESIG", 
+                             "Catégorie IUCN" = "IUCN_CAT",
+                             "Surface déclarée" = "REP_AREA"))
+
+```
 
 # Carte 4 (Aires marines et aires terrestres)
 
-Problème au niveau du géo-traitement de la fonction st()
-Résultats différents sur qGIS que lors de l'application des traitements sur R
+Pour découvrir la fonction de géotraitement 
+
+**Erreur 4 : obligée de séparer les deux couches pour l'affichage et donc deux légendes + AMP DANS ATP et vice-versa**
+
+Idéalement rendu : par année et non pas catégorie + palette de bleu pour les AMP / marron pour les ATP 
 
 ```{r}
 
@@ -198,20 +317,101 @@ Résultats différents sur qGIS que lors de l'application des traitements sur R
 WDPA_Senegal_poly <- WDPA_Senegal %>% 
   filter(st_geometry_type(.) == "MULTIPOLYGON")
 
-# On différencie par géo-traitement les aires marines et terrestres 
+# On différencie par géo-traitement les aires terrestres et marines
+
+# Aires marines protégées 
+
+WDPA_Senegal_poly_marin <- st_difference(WDPA_Senegal_poly, contour_senegal)
+
+st_write(WDPA_Senegal_poly_terrestre, "C:/Users/Lenaig MOIGN/Documents/R/AP_Senegal/JUMI_R/data/WDPA_marin.shp")
+
+
+# Aires terrestres protégées 
 
 WDPA_Senegal_poly_terrestre <- st_intersection(WDPA_Senegal_poly,contour_senegal)
 
-WDPA_Senegal_poly_marin <-  st_difference(WDPA_Senegal_poly, contour_senegal)
+st_write(WDPA_Senegal_poly_terrestre, "C:/Users/Lenaig MOIGN/Documents/R/AP_Senegal/JUMI_R/data/WDPA_terrestre.shp")
+
+# On visualise le résultat 
+
+tmap_mode(mode = "view") 
+
+tm_shape(contour_senegal) +
+  tm_borders() + 
+  tm_shape(WDPA_Senegal_poly_marin) + 
+  tm_polygons(col = "DESIG", alpha = 0.6, title = "Aires marines protégées",
+              id = "NAME", 
+              popup.vars = c("Type" = "DESIG", 
+                             "Catégorie IUCN" = "IUCN_CAT",
+                             "Surface déclarée" = "REP_AREA")) + 
+  tm_shape(WDPA_Senegal_poly_terrestre) + 
+  tm_polygons(col = "DESIG", alpha = 0.6, title = "Aires terrestres protégées",
+              id = "NAME", 
+              popup.vars = c("Type" = "DESIG", 
+                             "Catégorie IUCN" = "IUCN_CAT",
+                             "Surface déclarée" = "REP_AREA")))
 
 ```
 
 
-## SUPERPOSITION DES AIRES PROTEGEES
+## 7. SUPERPOSITION DES AIRES PROTEGEES
 
-à venir 
+**Erreur 5 : à approfondir**
 
-## ACQUISITION DE DONNEES ET CALCUL D'INDICATEURS
+```{r}
+# On ne garde que les polygones (sans les points)
+
+WDPA_Senegal_poly <- WDPA_Senegal %>% 
+  filter(st_geometry_type(.) == "MULTIPOLYGON")
+
+# On cumule les surfaces des aires de chaque polygone
+
+surface_cumul <- WDPA_Senegal_poly_terrestre %>%
+  mutate(surface = st_area(.)) %>%
+  st_drop_geometry() %>% 
+  summarise(surface = sum(surface, na.rm = TRUE)) %>%
+  mutate(`Type de cumul` = "Somme des surfaces terrestres de chaque aire protégée",
+         .before = everything())
+
+library(units)
+
+# On fusionne les polygones et on calcule la surface totale
+
+surface_tot <- WDPA_Senegal_poly_terrestre %>%
+  st_make_valid() %>%
+  st_union() %>%
+  st_as_sf() %>% 
+  mutate(surface = st_area(.)) %>%
+  st_drop_geometry() %>% 
+  summarise(surface = sum(surface, na.rm = TRUE)) %>%
+  mutate(`Type de cumul` = "Emprise totale des aires protégées",
+         .before = everything())
+
+compare_surfaces <- surface_cumul %>%
+  bind_rows(surface_tot) %>%
+  mutate(surface = set_units(surface, "hectares"),
+         surface = as.numeric(surface)) %>%
+  rename(`Surface (ha)` = surface)
+
+compare_surfaces %>%
+  gt() %>%
+  fmt_number(columns = `Surface (ha)`, use_seps = TRUE, decimals = 0) %>% 
+  tab_header(title = "Superposition des aires WDPA",
+             subtitle = "Somme des surfaces d'aires vs. emprise totale") %>%
+  tab_source_note("Source : WDPA (juin 20232), calculs des auteurs")
+
+```
+
+L'erreur que vous rencontrez indique un problème avec la géométrie de vos données spatiales. Plus précisément, l'erreur "Loop 26 is not valid: Edge 539 is degenerate (duplicate vertex)" indique qu'il y a un problème avec la géométrie de vos polygones.
+
+Pour résoudre ce problème, vous pouvez essayer les étapes suivantes :
+
+Vérifiez vos données : Assurez-vous que vos données géométriques sont correctes et qu'il n'y a pas de géométries invalides ou corrompues.
+
+Utilisez la fonction st_buffer() : Vous pouvez essayer d'appliquer une petite opération de tampon (buffer) à vos polygones avant d'utiliser st_make_valid(). Parfois, cela peut aider à résoudre les problèmes de géométrie invalides.
+
+
+## 8. ACQUISITION DE DONNEES ET CALCUL D'INDICATEURS
 
 # Constitution d'un porte-feuille 
 
@@ -232,23 +432,112 @@ On réfléchit à quelles données on souhaite récupérer et analyser. On véri
 leur disponibilité dans le package mapme.biodiversity() 
 
 ```{r}
-
 get_resources()
 available_resources()
 
 ```
 
-On récupère les données sur la mangrove de la plateforme Global Mangrove Watch 
+On récupère les données provenant des différentes sources d'open data et 
+on calcule des indicateurs 
 
 ```{r}
 
-# Chargement des données du GMW
+# Données de Global Mangrove Watch (GMW) sur la perte/extension de mangroves 
 
-WDPA_Senegal_poly <- get_resources(x = WDPA_Senegal_poly,resource = "gmw")
+?gmw()
+
+#Données uniquement pour les périodes 1996, 2007-2010, 2015, and 2016
+
+WDPA_Senegal_poly <- get_resources(x = WDPA_Senegal_poly,resources = "gmw")
+
+available_indicators()
+available_indicators(indicator = "mangroves_area")
+
+# Indicateurs GMW
+
+WDPA_Senegal_poly <- calc_indicators(WDPA_Senegal_poly,
+                                     indicators = "mangroves_area")
+                            
+
+# Données de Global Forest Watch (GFW) sur le couver forestier
+
+WDPA_Senegal_poly <- get_resources(x = WDPA_Senegal_poly, 
+                                       resources = c("gfw_treecover", "gfw_lossyear"))
+# Indicateurs GFW
+
+WDPA_Senegal_poly <- calc_indicators(WDPA_Senegal_poly,
+                                     indicators = "treecover_area",
+                                     min_cover = 30, min_size = 1)
+
+
+# Données d'accessibilité de Nelson et al. (2018)
+
+WDPA_Senegal_poly <-  get_resources(x = WDPA_Senegal_poly, resources = "nelson_et_al",  
+                               range_traveltime = "5k_110mio")
+
+# Indicateurs d'accessibilité
+
+WDPA_Senegal_poly <- calc_indicators(x = WDPA_Senegal_poly,
+                                "traveltime",  stats_accessibility = "mean",
+                                engine = "extract")
+
+# Modèle numérique de terrain SRTM de la NASA
+
+WDPA_Senegal_poly <- get_resources(x = WDPA_Senegal_poly , resources = "nasa_srtm")
+
+# Indicateurs de relief de terrain
+
+WDPA_Senegal_poly <- calc_indicators(x = WDPA_Senegal_poly,
+                                indicators = c("tri", "elevation"),
+                                stats_tri = "mean", stats_elevation = "mean")
+
+#ENREGISTREMENT FICHIER RDS
+
+save(WDPA_Senegal_poly, file = "data/WDPA_Senegal_indicators.rds") 
 
 ```
 
-Réléchir à d'autres indicateurs pertinents 
+
+## 9. TRI DES DONNEES POUR FACILITER L'ANALYSE DES INDICATEURS 
+
+# Agrégation des statistiques d’AP_poly (avoir pour chaque variable une valeur par aire protégée)
+
+**ERREUR 6 : soucis avec tree_cover_area** 
+
+```{r}
+
+# Valeur agrégées par AP (moyennes pondérées par la surface)
+
+WDPA_terrain <- WDPA_Senegal_poly %>%
+  unnest(cols = c(tri, elevation, traveltime, mangroves_area)) %>%
+  st_drop_geometry() 
+
+lengths(WDPA_Senegal_poly$treecover_area)
+
+
+select(,indice_accidente = tri_mean, dist_ville = minutes_mean, 
+         altitude = elevation_mean) %>%
+group_by(NAME) %>%
+summarise(indice_accidente = weighted.mean(indice_accidente, hectares,
+                                             na.rm = TRUE),
+            dist_ville = weighted.mean(dist_ville, hectares,
+                                       na.rm = TRUE),
+            altitude = weighted.mean(altitude, hectares,
+                                     na.rm = TRUE))
+  
+
+# Valeurs qu'on insère dans le jeu de données de travail
+
+load("data/WDPA_Senegal_indicators.rds")
+
+WDPA_of <- WDPA_Senegal_poly %>%
+  left_join(WDPA_terrain, by = "nom")
+
+save(AP_Vahatra, file = "data/ch2_AP_Vahatra.rds")
+
+```
+
+Graphique historique de création des aires protégées ! 
 
 Puis focus sur la Réserve de la Somone 
 
