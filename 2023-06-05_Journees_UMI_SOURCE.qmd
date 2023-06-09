@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 ---
 title: "Journées de l'UMI SOURCE "
 author: "Lenaïg MOIGN, Florent Bédécarrats"
@@ -11,6 +10,8 @@ editor: visual
 execute:
   warning: false
   error: false
+editor_options: 
+  chunk_output_type: console
 ---
 
 ## 1. INSTALLATION ET CHARGEMENT DES LIBRAIRIES R
@@ -65,13 +66,13 @@ WDPA_Senegal <- wdpa_fetch("Senegal", wait = TRUE,
 
 # On télécharge la version en ligne
 
-contour_senegal <- gadm(country = "Senegal", resolution = 1, level = 0,
+contour_sen <- gadm(country = "Senegal", resolution = 1, level = 0,
                      path = "data/GADM") %>%
 st_as_sf()
 
 # On charge la version disponible localement 
 
-save(contour_sen, file = "data/GADM/gadm/contour_sen.rds")
+save(contour_sen, file = "data/GADM/contour_sen.rds")
 str(contour_sen)
 
 ```
@@ -189,11 +190,12 @@ AP_mandats <- WDPA_mandats %>%
   group_by(Periode) %>% # Groupement des données par période de création de l'aire protégée 
   summarise(Effectif_total = n()) %>%  # Calcul du nombre d'observations pour chaque année 
   arrange(Periode) %>% #Tri des données par ordre croissant
-  mutate(Nom = c("ABDOU DIOUF", "ABDOULAYE WADE", "MACKY SALL"))%>%
+  mutate(Nom = c("ABDOU DIOUF", "ABDOULAYE WADE", "MACKY SALL"))
 
 # Création d'un beau tableau (ERREUR) 
 
 AP_mandats %>%
+  st_drop_geometry()%>% 
   gt() %>%
   cols_label(Periode = "Mandat", Effectif_total = "Nombre de création d'aires protégées", Nom = "Président") %>%
   tab_header("Nombre de création d'aires protégées durant les derniers mandats présidentiels au Sénégal") %>%
@@ -540,143 +542,3 @@ save(AP_Vahatra, file = "data/ch2_AP_Vahatra.rds")
 Graphique historique de création des aires protégées ! 
 
 Puis focus sur la Réserve de la Somone 
-
-=======
----
-title: "Journées de l'UMI SOURCE"
-author: "Lenaïg MOIGN, Florent Bédécarrats"
-format:
-  html:
-    output-file: "index"
-    output-ext: "htm"
-    toc: true
-editor: visual
-execute:
-  warning: false
-  error: false
----
-
-## CHARGEMENT DES LIBRAIRIES
-
-gjeheuzknnzoe
-
-```{r}
-# INSTALLATION DES LIBRAIRIES R 
-
-librairies_req <- c("tidyverse",# Une série de packages pour faciliter la manipulation de données
-                    "readxl", # Pour lire les fichiers excel (Carvalho et al. 2018)
-                    "writexl",# Pour écrire des fichiers excel 
-                    "sf", # Pour faciliter la manipulation de données géographiques
-                    "maptiles", # Pour télécharger des fonds de carte 
-                    "geodata", # Pour télécharger simplement les frontières administratives
-                    "tidygeocoder", # Pour obtenir les coordonnées GPS d'un point à partir de son nom 
-                    "tmap",# Pour produire de jolies cartes 
-                    "wdpar", # Pour télécharger la base d'aires protégées WDPA
-                    "mapme.biodiversity") # Pour importer et analyser des indicateurs de biodiversité
-
-# CHARGEMENT DES LIBRAIRIES
-
-library(tidyverse)
-library(geodata)
-library(sf)
-library(tmap)
-library(wdpar)
-
-```
-
-## CHARGEMENT DES DONNEES
-
-fgrgrht
-
-```{r}
-#TELECHARGEMENT DES DONNEES DU WDPA 
-
-WDPA_Senegal <- wdpa_fetch("Senegal", wait = TRUE, 
-                          download_dir = "data/WDPA")
-
-```
-
-## EXPLORATION DES DONNEES
-
-Quels types de géométrie ? Quel système de projection ?
-
-```{r}
-
-# CONNAITRE LES GEOMETRIES DE LA COUCHE (POINTS, LIGNES, POLYGONES) 
-
-WDPA_Senegal %>%
-  mutate(geom_type = st_geometry_type(.)) %>%  # Ajout d'une colonne pour les catégories de géométries
-  group_by(geom_type) %>%  # Tri des données en fonction de leur catégorie  
-  summarise(n = n()) # Résumé pour chaque catégorie de géométrie
-
-# CONNAITRE LE SYSTEME DE PROJECTION 
-
-crs(WDPA_Senegal)
-
-```
-
-Pour aller plus loin : ajuster manuellement le système de projection
-
-## DECRIRE LES DONNEES (TABLEAU DESCRIPTIF)
-
-Connaître les années de création
-
-```{r}
-AP_Annees <- WDPA_Senegal %>%
-  filter(st_geometry_type(.) == "MULTIPOLYGON") %>% # Sélection des polygones 
-  mutate(GIS_AREA= st_area(.), # Création d'une colonne avec la superficie de chaque polygone 
-         GIS_AREA= units::set_units(GIS_AREA, "km2"))%>% # Conversion de l'unité en km² 
-  group_by(STATUS_YR) %>% # Groupement des données par année de création de l'aire protégée 
-  summarise(n = n(), # Calcul du nombre d'observations pour chaque année dans une colonne de l'effectif n
-            area = sum(GIS_AREA)) %>% # Somme des superficies pour chaque groupe dans une colonne area  
-  arrange(STATUS_YR) #Tri des données par ordre croissant
-
-```
-
-Attirer l'attention sur le double pipe operator pour comprendre la logique de création du tableau
-
-Afficher le nom des aires protégées créées en 2020 Afficher le nombre des aires protégées créées entre \[1981-2000\] ; \[2000-2012\] ; \[2012-2023\]
-
-## CONNAITRE LES DONNEES MANQUANTES
-
-```{r}
-# VERIFIER LES VALEURS MANQUANTES 
-
-AP_Senegal_of %>%
-  st_drop_geometry() %>%
-  summarise("Nombre total d'aires protégées" = n(),
-            "Catégorie IUCN manquante" = sum(IUCN_CAT == "Not Reported"),
-            "Année de création manquante" = sum(STATUS_YR == 0),
-            "Gestionnaire manquant" = sum(MANG_AUTH == "Not Reported")) %>%
-  pivot_longer(cols = everything(),
-               names_to = " ",
-               values_to = "Nombre d'aires") %>%
-  gt() %>%
-  tab_header("Valeurs manquantes dans les données WDPA pour le Sénégal") %>%
-  tab_source_note("Source : WDPA (juin 2023)")
-
-```
-
-## VISUALER LES DONNEES GEOGRAPHIQUES (CARTE DESCRIPTIVE)
-
-```{r}
-# RENDU CARTO
-
-tmap_mode(mode = "view")
-# tm_shape(contour_senegal) +
-# tm_borders() + 
-tm_shape(WDPA_Senegal) + 
-tm_polygons(col = "IUCN_CAT", alpha = 0.6, title = "Catégorie IUCN",
-            id = "NAME", 
-            popup.vars = c("Type" = "DESIG", 
-                            "Catégorie IUCN" = "IUCN_CAT",
-                            "Surface déclarée" = "REP_AREA",
-                            "Année du statut" = "STATUS_YR"))
-#ADITIONAL OPTIONS 
-
-tmap_options(check.and.fix = TRUE)
-
-```
-
-## ACQUISITION DE DONNEES ET CALCUL D'INDICATEURS
->>>>>>> e7a8c4160ee1a7827ded92925d0a7db08c2c5c99
