@@ -280,21 +280,21 @@ library(tmap)
 
 # On spécifie qu'il s'agit d'années pour la colonne STATUS_YR
 
-WDPA_Senegal_poly <- WDPA_Senegal %>% 
-  filter(STATUS_YR != 0)  %>% 
-  mutate(STATUS_YR = as.Date(STATUS_YR, origin = "1950-01-01"),
-        STATUS_YR = year(STATUS_YR)) 
+WDPA_Senegal_yr <- WDPA_Senegal %>% 
+  filter(STATUS_YR != 0)
 
 
 # Sur le rendu de la carte, une seule catégorie d'année apparaît 
 
-#tmap_mode(mode = "view") 
-#tm_shape(contour_senegal) +
- # tm_borders() + 
-  #tm_shape(WDPA_Senegal_poly) + 
-  #tm_polygons(col = "STATUS_YR", alpha = 0.6, title = "Création d'aires protégées au Sénégal",
-              #id = "NAME", 
-              #popup.vars = c("Type" = "DESIG", 
+tmap_mode(mode = "view")
+tm_shape(contour_senegal) +
+  tm_borders() +
+  tm_shape(WDPA_Senegal_yr) +
+  tm_polygons(col = "STATUS_YR", alpha = 0.6, 
+              title = "Création d'aires protégées au Sénégal",
+              legend.format = list(big.mark = ""),
+              id = "NAME",
+              popup.vars = c("Type" = "DESIG",
                              "Catégorie IUCN" = "IUCN_CAT",
                              "Surface déclarée" = "REP_AREA"))
 
