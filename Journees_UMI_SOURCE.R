@@ -350,6 +350,10 @@ WDPA_mapme <- calc_indicators(WDPA_mapme,
 WDPA_mapme <-  get_resources(x = WDPA_mapme, resources = "nelson_et_al",  
                              range_traveltime = "5k_110mio")
 
+?nelson_et_al
+
+#year of 2015
+
 # Indicateurs d'accessibilité
 
 WDPA_mapme <- calc_indicators(x = WDPA_mapme,
@@ -371,61 +375,62 @@ WDPA_mapme <- calc_indicators(x = WDPA_mapme,
 save(WDPA_mapme, file = "data/WDPA_indicators.rds") 
 
 
-
 # 10. TRI DES DONNEES POUR FACILITER ANALYSE DES INDICATEURS 
 
-# WDPA_terrain : désimbrication des indicateurs
+
+# Tableau 1 : Désimbrication des indicateurs (WDPA_terrain)
 
 WDPA_terrain <- WDPA_mapme %>%
   st_drop_geometry() %>% 
   unnest(c(tri, elevation, mangroves_area)) %>% 
   unnest(c(traveltime,treecover_area))
-  
-# Tableau 1. Informations relatives à la mangrove et au couvert forestier
 
 
-table_années <- WDPA_terrain %>%
-  mutate(Année = ifelse(year == years, year, NA))%>%
-  filter(year == years) %>%
-  select(ORIG_NAME, Année, treecover, mangrove_extent) %>% 
-  filter(treecover != 0 | mangrove_extent != 0 )
+# Tableau 2 : Agrégation par aires protégées (pondération par la surface)
 
-summary_table <- table_années %>%
-  group_by(ORIG_NAME) %>% 
-  summarise(min_année = min(Année),
-            max_année = max(Année),
-            mean_treecover = mean(treecover),
-            mean_mangrove_extent = mean(mangrove_extent))
-  
-  
-# Tableau 2. 
-
-tableau_AP <- WDPA_terrain %>%
-  select(ORIG_NAME,REP_AREA, indice_accidente = tri_mean, dist_ville = minutes_mean, 
+WDPA_terrain_AP <- WDPA_terrain %>% 
+  select(Nom = ORIG_NAME, 
+         Surface = REP_AREA, 
+         Aire_marine_terrestre = MARINE, 
+         mangrove_surface = mangrove_extent, 
+         indice_accidente = tri_mean, 
+         dist_ville = minutes_mean, 
          altitude = elevation_mean) %>% 
-  group_by(ORIG_NAME) %>%
-  summarise(indice_accidente = weighted.mean(indice_accidente, hectares,
+  group_by(Nom) %>% 
+  mutate(indice_accidente = weighted.mean(indice_accidente, Surface,
                                              na.rm = TRUE),
-            dist_ville = weighted.mean(dist_ville, hectares,
+            dist_ville = weighted.mean(dist_ville, Surface,
                                        na.rm = TRUE),
-            altitude = weighted.mean(altitude, hectares,
-                                     na.rm = TRUE))
-
-view(tableau_AP)
-
-
-library(ggplot2)
-
-# Tableau 3. Delta du Saloum
-
-table_DS <- table_années %>% 
-  filter(treecover != 0 & ORIG_NAME== "Delta du Saloum")
-
-
-
-
-
-
-
+            altitude = weighted.mean(altitude, Surface,
+                                     na.rm = TRUE),
+            mangrove_surface = weighted.mean(mangrove_surface, Surface, 
+                                             na.rm = TRUE)) %>% 
+  unique() 
   
+
+
+# Tableau 3 : Delta du Saloum ré-implantation de mangrove en 2003 (voir l'évolution? )
+
+WDPA_DS <-  WDPA_terrain %>% 
+  select(Nom = NAME, Surface = REP_AREA, Mangrove_Surface = mangrove_extent,Année = year) %>% 
+  group_by(Année) %>% 
+  filter(Nom == "Delta du Saloum") %>% 
+  summarise(Mangrove_surface = weighted.mean(Mangrove_Surface, Surface))
+
+
+# Tableau 4 : Zones où il y a eu une ré-implantation de mangroves
+
+tableau_restauration <- WDPA_terrain %>%
+  select(Nom = ORIG_NAME, 
+        Surface = REP_AREA, 
+        Année = year, 
+        Mangrove_surface = mangrove_extent) %>% 
+  group_by(Nom, Année) %>% 
+  summarise(Mangrove_surface = weighted.mean(Mangrove_surface, Surface))
+
+#Très bien on touche plus 
+
+# # verif_restauration <- tableau_restauration %>% 
+#   filter(Mangrove_surface == 0 & lead(Mangrove_surface) > 1000) 
+#   select(Nom, Année)
 
