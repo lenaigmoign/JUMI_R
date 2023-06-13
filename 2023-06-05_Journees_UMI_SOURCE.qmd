@@ -24,7 +24,7 @@ editor_options:
 
 *expliquer principe des librairies qui sont mobilisées*
 
-```{r}
+```{r install_librairies} 
 
 # INSTALLATION DES LIBRAIRIES R 
 
@@ -179,7 +179,7 @@ WDPA_Senegal %>%
 ```{r}
 
 tmap_mode(mode = "view") 
-tm_shape(contour_senegal) +
+tm_shape(contour_sen) +
   tm_borders() + 
   tm_shape(WDPA_Senegal) + 
   tm_polygons(col = "DESIG", alpha = 0.6, title = "Catégories d'aires protégées au Sénégal",
@@ -252,7 +252,10 @@ Cela va régler des informations importantes qui sont nécessaires plus loin dan
 
 # Exécuter la fonction init_portfolio
 
-?init_portfolio
+
+WDPA_Senegal_poly <- WDPA_Senegal %>% 
+  filter(st_geometry_type(.) == "MULTIPOLYGON")
+
 
 WDPA_mapme <- WDPA_Senegal_poly %>% 
   st_cast("POLYGON")
@@ -262,7 +265,7 @@ WDPA_mapme <- init_portfolio(x = WDPA_mapme,
                                      outdir = "data/mapme_Senegal",
                                      add_resources = TRUE,
                                      verbose = TRUE)
-?init_portfolio
+
 
 ```
 
