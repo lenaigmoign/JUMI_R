@@ -100,7 +100,7 @@ AP_mandats <- WDPA_mandats %>%
   arrange(Periode) %>% #Tri des données par ordre croissant
   mutate(Nom = c("ABDOU DIOUF", "ABDOULAYE WADE", "MACKY SALL"))
 
-# Création d'un beau tableau (ERREUR) 
+# Création d'un beau tableau  
 
 AP_mandats %>%
   st_drop_geometry()%>% 
@@ -169,23 +169,19 @@ Pour découvrir la fonction de géotraitement
 
 ```{r}
 
-# Création d'intersection 
-
-# On différencie par géo-traitement les aires terrestres et marines
-
-# Version 1 
+# Version 1 : en utilisant la géo-traitement
 
 PA_terrestre <- WDPA_Senegal %>%
-  st_intersection(contour_sen)
+  st_intersection(contour_sen) #intersection
 PA_marine <- WDPA_Senegal %>%
-  st_difference(contour_sen)
+  st_difference(contour_sen) #différence
 
 tm_shape(PA_terrestre) +
   tm_polygons(col = "brown") +
 tm_shape(PA_marine) + 
   tm_polygons(col = "blue")
 
-# Version 2 
+# Version 2 : renseigné dans la table d'attributs
 
 tm_shape(WDPA_Senegal) + 
   tm_polygons(col = "MARINE", alpha = 0.6, title = "Aires protégées")
@@ -242,4 +238,69 @@ compare_surfaces %>%
 
 ```
 
+# PARTIE INDICATEURS 
 
+```{r}
+# Données de Global Forest Watch (GFW) sur le couvert forestier
+
+WDPA_mapme <- get_resources(x = WDPA_mapme, 
+                            resources = c("gfw_treecover", "gfw_lossyear"))
+
+# Indicateurs GFW
+
+WDPA_mapme <- calc_indicators(WDPA_mapme,
+                                    indicators = "treecover_area",
+                                    min_cover = 30, min_size = 1)
+
+# Données d'accessibilité de Nelson et al. (2018)
+
+WDPA_mapme <-  get_resources(x = WDPA_mapme, resources = "nelson_et_al",  
+                               range_traveltime = "5k_110mio")
+
+# Indicateurs d'accessibilité
+
+WDPA_mapme <- calc_indicators(x = WDPA_mapme,
+                                "traveltime",  stats_accessibility = "mean",
+                                engine = "extract")
+
+# Modèle numérique de terrain SRTM de la NASA
+
+WDPA_mapme <- get_resources(x = WDPA_mapme , resources = "nasa_srtm")
+
+# Indicateurs de relief de terrain
+
+WDPA_mapme <- calc_indicators(x = WDPA_mapme,
+                                indicators = c("tri", "elevation"),
+                                stats_tri = "mean", stats_elevation = "mean")
+```
+
+Partie réflexion 
+
+# Tableau 3 : Delta du Saloum ré-implantation de mangrove en 2003 (voir l'évolution?)
+
+
+```{r}
+WDPA_DS <-  WDPA_terrain %>% 
+  select(Nom = NAME, Surface = REP_AREA, Mangrove_Surface = mangrove_extent,Année = year) %>% 
+  group_by(Année) %>% 
+  filter(Nom == "Delta du Saloum") %>% 
+  summarise(Mangrove_surface = weighted.mean(Mangrove_Surface, Surface))
+```
+
+
+# Rechercher les zones où on est passés de 0 surface de mangrove à !=0 
+
+```{r}
+
+# Tableau 4 : Zones où il y a eu une ré-implantation de mangroves
+
+tableau_restauration <- WDPA_terrain %>%
+  group_by(Nom, Année) %>% 
+  summarise(Mangrove_surface = weighted.mean(Mangrove_surface, Surface))
+
+```
+
+# # verif_restauration <- tableau_restauration %>% 
+#   filter(Mangrove_surface == 0 & lead(Mangrove_surface) > 1000) 
+#   select(Nom, Année)
+  

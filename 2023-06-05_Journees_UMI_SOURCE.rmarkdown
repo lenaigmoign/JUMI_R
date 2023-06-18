@@ -1,0 +1,443 @@
+---
+title: "Journées de l'UMI SOURCE "
+author: "Lenaïg MOIGN, Florent Bédécarrats"
+format:
+  html:
+    output-file: "index"
+    output-ext: "htm"
+    toc: true
+editor: visual
+execute:
+  warning: false
+  error: false
+editor_options: 
+  chunk_output_type: console
+---
+
+
+## 1. FONCTIONNEMENT DE R STUDIO
+
+
+## 2. OBJECTIFS DE LA FORMATION
+
+
+## 3. INSTALLATION ET CHARGEMENT DES LIBRAIRIES R
+
+*expliquer principe des librairies qui sont mobilisées*
+
+
+```{r}
+
+# INSTALLATION DES LIBRAIRIES R 
+
+librairies_req <- c("tidyverse",# Une série de packages pour faciliter la manipulation de données
+                    "readxl", # Pour lire les fichiers excel (Carvalho et al. 2018)
+                    "writexl",# Pour écrire des fichiers excel 
+                    "gt",# Pour produire de jolis tableaux
+                    "sf", # Pour faciliter la manipulation de données géographiques
+                    "maptiles", # Pour télécharger des fonds de carte 
+                    "geodata", # Pour télécharger simplement les frontières administratives
+                    "tidygeocoder", # Pour obtenir les coordonnées GPS d'un point à partir de son nom 
+                    "tmap",# Pour produire de jolies cartes 
+                    "wdpar", # Pour télécharger la base d'aires protégées WDPA
+                    "mapme.biodiversity") # Pour importer et analyser des indicateurs de biodiversité
+
+manquantes <- !(librairies_req %in% installed.packages())
+if (any(manquantes)) install.packages(librairies_req[manquantes])
+
+# CHARGEMENT DES LIBRAIRIES NECESSAIRES AUX PREMIERS TRAVAUX
+
+library(tidyverse)
+library(geodata)
+library(sf)
+library(tmap)
+library(wdpar)
+library(gt)
+library(dplyr)
+library(lubridate)
+library(tmap)
+library(mapme.biodiversity)
+
+```
+
+
+## 2. CHARGEMENT DES DONNEES SUR LES AIRES PROTEGEES
+
+*expliquer initiative WDPA, l'origine des données à disposition*
+
+
+```{r}
+
+# TELECHARGEMENT DES DONNEES DU WDPA 
+
+WDPA_Senegal <- wdpa_fetch("Senegal", wait = TRUE, 
+                          download_dir = "data/WDPA")
+
+```
+
+
+## 3. CHARGEMENT DES CONTOURS ADMINISTRATIFS
+
+
+```{r}
+
+# On télécharge la version en ligne
+
+contour_sen <- gadm(country = "Senegal", resolution = 1, level = 0,
+                     path = "data/GADM") %>%
+st_as_sf()
+
+# On charge la version disponible localement 
+
+save(contour_sen, file = "data/GADM/contour_sen.rds")
+str(contour_sen)
+
+```
+
+
+## 4. EXPLORATION DES DONNEES DISPONIBLES SUR LES AIRES PROTEGEES
+
+# CARACTERISTIQUES SPATIALES
+
+On charge de l'information géographique, il est important de connaître 
+les caractéristiques de base des objets à savoir :
+
+Quels types de géométrie ? Quel système de projection ?
+
+
+```{r}
+
+# CONNAITRE LES GEOMETRIES DE LA COUCHE (POINTS, LIGNES, POLYGONES) 
+
+WDPA_Senegal %>%
+  mutate(geom_type = st_geometry_type(.)) %>%  # Ajout d'une colonne pour les catégories de géométries
+  group_by(geom_type) %>%  # Tri des données en fonction de leur catégorie  
+  summarise(n = n()) # Résumé pour chaque catégorie de géométrie
+
+# CONNAITRE LE SYSTEME DE PROJECTION 
+
+crs(WDPA_Senegal)
+
+```
+
+
+# UTILISER LES OPERATEURS POUR SELECTIONNER L'INFORMATION
+
+Connaître les aires protégées créées en 2020 :
+
+
+```{r}
+
+WDPA_Senegal %>% 
+filter(STATUS_YR == 2020) %>% 
+select(NAME, DESIG)  
+
+```
+
+
+Connaître les aires protégées avant 1972 :
+
+
+```{r}
+
+# CONNAITRE LES AIRES PROTEGEES CREES AVANT 1972 (ETAPE 1)
+
+WDPA_Senegal %>% 
+filter(STATUS_YR < 1972) %>% 
+select(NAME, DESIG) 
+
+# CONNAITRE LES AIRES PROTEGEES CREES AVANT 1972 (ETAPE 2) 
+# que celles dont on connaît l'année de création
+
+WDPA_Senegal %>% 
+  filter(STATUS_YR < 1972 & STATUS_YR != 0) %>% 
+  select(NAME, DESIG) 
+
+# CONNAITRE LES AIRES PROTEGEES CREES AVANT 1972 (ETAPE 3)
+#que les polygones 
+
+WDPA_Senegal %>% 
+  filter(STATUS_YR < 1972 & STATUS_YR != 0) %>% 
+  filter(st_geometry_type(.) == "MULTIPOLYGON") %>%
+  select(NAME, DESIG) 
+
+```
+
+
+# CONNAITRE LES DONNEES MANQUANTES
+
+
+```{r}
+
+# VERIFIER LES VALEURS MANQUANTES 
+
+WDPA_Senegal %>%
+  st_drop_geometry() %>%
+  summarise("Nombre total d'aires protégées" = n(),
+            "Catégorie IUCN manquante" = sum(IUCN_CAT == "Not Reported"),
+            "Année de création manquante" = sum(STATUS_YR == 0),
+            "Gestionnaire manquant" = sum(MANG_AUTH == "Not Reported")) %>%
+  pivot_longer(cols = everything(),
+               names_to = " ",
+               values_to = "Nombre d'aires") %>%
+  gt() %>%
+  tab_header("Valeurs manquantes dans les données WDPA pour le Sénégal") %>%
+  tab_source_note("Source : WDPA (juin 2023)")
+
+```
+
+
+## 5. PRODUIRE DES CARTES
+
+# Carte 1. Catégorie d'aires protégées 
+
+
+```{r}
+
+tmap_mode(mode = "view") 
+tm_shape(contour_sen) +
+  tm_borders() + 
+  tm_shape(WDPA_Senegal) + 
+  tm_polygons(col = "DESIG", alpha = 0.6, title = "Catégories d'aires protégées au Sénégal",
+              id = "NAME", 
+              popup.vars = c("Type" = "DESIG", 
+                             "Catégorie IUCN" = "IUCN_CAT",
+                             "Surface déclarée" = "REP_AREA",
+                             "Année du statut" = "STATUS_YR"))
+tmap_options(check.and.fix = TRUE)
+
+```
+
+
+
+## 6. ACQUISITION DE DONNEES ET CALCUL D'INDICATEURS
+
+# Données mapme.biodiversity
+
+Le package "mapme.biodiversity" facilite l'analyse de données statistiques sur les aires protégées partout dans le monde.
+
+Il supporte un nombre important de base de données et d'indicateurs associés relatifs à la biodiversité qui peuvent être utilisés pour surveiller et évaluer l'efficacité des efforts de protection.
+
+Pour l'analyse des données géographiques, le package utilise sf pour l'exploitation des données vectorielles et terra pour les données rasters. Il supprime les tâches répétitives, telles que la la sélection temporelle et spatiale des ressources.
+
+
+```{r}
+
+help(package = "mapme.biodiversity")
+
+```
+
+
+Le package permet de calculer, via une importation de données provenant de sources open data, des indicateurs, disponibles sur des intervalles de temps réguliers pour environ deux décennies (2020-2020). 
+
+Ces indicateurs permettent aux usagers d'analyser des dynamiques spatiales et temporelles relatives aux aires protégées. Pour connaître les ressources et les indicateurs associés disponibles :
+
+
+```{r}
+
+resources <- names(available_resources())
+indicators <- names(available_indicators())
+
+```
+
+
+A la lecture de la liste, l'utilisateur choisit quels sont les indicateurs qui l'intéresse en fonction de ses objectifs d'analyse. Plus de détails sur les indicateurs (source, unité, limites) sont consultables sur le site : https://mapme-initiative.github.io/mapme.biodiversity/reference/index.html ou peuvent faire l'objet d'une recherche.
+
+
+```{r}
+
+?gmw
+
+```
+
+
+# Constitution d'un porte-feuille
+
+Une fois le choix effectué, il doit d'abord initier un portefeuille de la 
+biodiversité en utilisant un objet sf qui contient uniquement des géométries de 
+type "polygone" via l'appel de la fonction init_portfolio().
+
+Il s'agit d'apporter un traitement spécifique à l'objet sf constitué de polygones. 
+Chaque ligne de l'objet est alors considérée comme un actif unique dans le portefeuille 
+pour lequel des indicateurs de biodiversité seront calculés plus loin dans la chaîne de traitement.
+
+NB : Si les aires protégées étaient de type multipolygone, on applique la fonction st_cast() pour considérer les polygones individuellement.
+
+C'est-à-dire que le portefeuille produit des colonnes imbriquées pour chaque observation, car dans bien des cas, on peut avoir plusieurs valeurs (par année) pour une même observation, voire plusieurs variables. Par exemple, le calcul de l'indicateur traveltime produit des estimations de distance par rapport à une ville pour plusieurs tailles de ville possible. Lorsqu'on spécifie une taille, il produit deux variables : la distance estimée et la taille de la ville prise en compte pour l'estimation.
+
+En créant le portefeuille, certaines vérifications préliminaires sont également effectuées, par exemple que le SRS de l'objet est EPSG:4326, sinon il sera transformé.
+
+Certains paramètres globaux du portefeuille, tels que le répertoire de sortie pour les ensembles de données téléchargés, un répertoire temporaire pour les calculs intermédiaires, peuvent être définis par l'utilisateur pour avoir un contrôle plus précis du flux de travail. Cependant, ces paramètres sont également définis sur des valeurs par défaut sensibles et peuvent donc être omis lors de l'initialisation du portefeuille.
+
+Cela va régler des informations importantes qui sont nécessaires plus loin dans la chaîne de traitement. Il est ensuite possible de demander le téléchargement d'une ressource qui est nécessaire pour importer les données dans le portefeuille et calculer les indicateurs spécifiques.
+
+
+```{r}
+
+# Exécuter la fonction init_portfolio
+
+
+WDPA_Senegal_poly <- WDPA_Senegal %>% 
+  filter(st_geometry_type(.) == "MULTIPOLYGON")
+
+
+WDPA_mapme <- WDPA_Senegal_poly %>% 
+  st_cast("POLYGON")
+
+WDPA_mapme <- init_portfolio(x = WDPA_mapme, 
+                                     years = 1980:2020,
+                                     outdir = "data/mapme_Senegal",
+                                     add_resources = TRUE,
+                                     verbose = TRUE)
+
+
+```
+
+
+On récupère les données provenant des différentes sources d'open data et on calcule des indicateurs :
+
+
+```{r}
+
+# Données de Global Mangrove Watch (GMW) sur la perte/extension de mangroves 
+# NB : uniquement pour les périodes 1996, 2007-2010, 2015 et 2016
+
+WDPA_mapme <- get_resources(x = WDPA_mapme,resources = "gmw")
+
+available_indicators()
+available_indicators(indicator = "mangroves_area")
+
+# Indicateurs GMW
+
+WDPA_mapme <- calc_indicators(WDPA_mapme,
+                              indicators = "mangroves_area")
+                            
+
+# Données de Global Forest Watch (GFW) sur le couver forestier
+
+WDPA_mapme <- get_resources(x = WDPA_mapme, 
+                            resources = c("gfw_treecover", "gfw_lossyear"))
+# Indicateurs GFW
+
+WDPA_mapme <- calc_indicators(WDPA_mapme,
+                                    indicators = "treecover_area",
+                                    min_cover = 30, min_size = 1)
+
+# Données d'accessibilité de Nelson et al. (2018)
+
+WDPA_mapme <-  get_resources(x = WDPA_mapme, resources = "nelson_et_al",  
+                               range_traveltime = "5k_110mio")
+
+# Indicateurs d'accessibilité
+
+WDPA_mapme <- calc_indicators(x = WDPA_mapme,
+                                "traveltime",  stats_accessibility = "mean",
+                                engine = "extract")
+
+# Modèle numérique de terrain SRTM de la NASA
+
+WDPA_mapme <- get_resources(x = WDPA_mapme , resources = "nasa_srtm")
+
+# Indicateurs de relief de terrain
+
+WDPA_mapme <- calc_indicators(x = WDPA_mapme,
+                                indicators = c("tri", "elevation"),
+                                stats_tri = "mean", stats_elevation = "mean")
+
+#ENREGISTREMENT FICHIER RDS
+
+save(WDPA_mapme, file = "data/WDPA_indicators.rds") 
+
+```
+
+
+## 8. TRI DES DONNEES POUR FACILITER L'ANALYSE DES INDICATEURS
+
+Une fois que l'indicateur a été calculé individuellement pour tous les "actifs" du portefeuille, les données sont renvoyées sous la forme d'une colonne de liste imbriquée à l'objet d'origine.Si on a plusieurs indicateurs, on aura plusieurs colonnes avec des listes ayant une, deux ou plusieurs variables.
+
+Cette imbrication n'est pas toujours indispensable. Par exemple, pour les cinq variables calculées ici (couvert forestier, surface de mangrove, rugosité, altitude et distance à une ville), car on ne cherche qu'une valeur par observation. On va donc dés-imbriquer les variables à l'aide de la fonction unnest().
+
+On doit aussi se rappeler que les aires protégées sont parfois composées de plusieurs polygones disjoints et que mapme.biodiversity a calculé chaque indicateur pour chaque polygone séparément. Pour chaque aire protégée, on va donc faire la moyenne de ces indicateurs, pondérée par la surface respective de chaque polygone.
+
+
+```{r}
+
+# Tableau 1. Désimbrication des indicateurs (WDPA_terrain)
+
+WDPA_terrain <- WDPA_mapme %>%
+  st_drop_geometry() %>% 
+  unnest(c(tri, elevation, mangroves_area)) %>% 
+  unnest(c(traveltime,treecover_area))
+
+```
+
+
+On obtient alors un tableau avec un nombre d'observations 
+important pour un même polygone.Pour un espace donné, plusieurs variables
+sont mesurées et sur des périodes de temps différentes. 
+
+
+```{r}
+
+# Tableau 2. Agrégation des polygones d'aires protégées (WDPA_terrain_AP) 
+#pondération par la surface 
+
+WDPA_terrain_AP <- WDPA_terrain %>% 
+  select(Nom = ORIG_NAME, 
+         Surface = REP_AREA, 
+         Aire_marine_terrestre = MARINE, 
+         mangrove_surface = mangrove_extent, 
+         indice_accidente = tri_mean, 
+         dist_ville = minutes_mean, 
+         altitude = elevation_mean) %>% 
+  group_by(Nom) %>% 
+  mutate(indice_accidente = weighted.mean(indice_accidente, Surface,
+                                             na.rm = TRUE),
+            dist_ville = weighted.mean(dist_ville, Surface,
+                                       na.rm = TRUE),
+            altitude = weighted.mean(altitude, Surface,
+                                     na.rm = TRUE),
+            mangrove_surface = weighted.mean(mangrove_surface, Surface, 
+                                             na.rm = TRUE)) %>% 
+  unique() 
+
+```
+
+
+xxxx
+
+
+```{r}
+
+# Tableau 3 : Delta du Saloum ré-implantation de mangrove en 2003 (voir l'évolution?)
+
+WDPA_DS <-  WDPA_terrain %>% 
+  select(Nom = NAME, Surface = REP_AREA, Mangrove_Surface = mangrove_extent,Année = year) %>% 
+  group_by(Année) %>% 
+  filter(Nom == "Delta du Saloum") %>% 
+  summarise(Mangrove_surface = weighted.mean(Mangrove_Surface, Surface))
+
+```
+
+
+xxx
+
+
+```{r}
+
+# Tableau 4 : Zones où il y a eu une ré-implantation de mangroves
+
+tableau_restauration <- WDPA_terrain %>%
+  select(Nom = ORIG_NAME, 
+        Surface = REP_AREA, 
+        Année = year, 
+        Mangrove_surface = mangrove_extent) %>% 
+  group_by(Nom, Année) %>% 
+  summarise(Mangrove_surface = weighted.mean(Mangrove_surface, Surface))
+
+```
+
+
+# # verif_restauration <- tableau_restauration %>% 
+#   filter(Mangrove_surface == 0 & lead(Mangrove_surface) > 1000) 
+#   select(Nom, Année)

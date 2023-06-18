@@ -54,6 +54,8 @@ str(contour_sen)
 
 ## 5. EXPLORATION DES DONNEES DISPONIBLES SUR LES AIRES PROTEGEES 
 
+
+
 # CREATION D'UN TABLEAU SYNTHETIQUE 
 
 AP_Annees <- WDPA_Senegal %>%
@@ -120,10 +122,11 @@ AP_mandats <- WDPA_mandats %>%
   arrange(Periode) %>% #Tri des données par ordre croissant
   mutate(Nom = c("ABDOU DIOUF", "ABDOULAYE WADE", "MACKY SALL")) 
   
-# Création d'un beau tableau (FAUX) 
+# Création d'un beau tableau (FAUX)
 
 AP_mandats %>%
   gt() %>%
+  select(-geometry)
   cols_label(Periode = "Mandat", Effectif_total = "Nombre de création d'aires protégées", Nom = "Président") %>%
   tab_header("Nombre de création d'aires protégées durant les derniers mandats présidentiels au Sénégal") %>%
   tab_source_note("Source : Données du WDPA (juin 2023)")
@@ -150,7 +153,7 @@ WDPA_Senegal %>%
 # RENDU CARTOGRAPHIQUE (NUMERO 1)
 
 tmap_mode(mode = "view") 
-tm_shape(contour_senegal) +
+tm_shape(contour_sen) +
 tm_borders() + 
 tm_shape(WDPA_Senegal) + 
 tm_polygons(col = "IUCN_CAT", alpha = 0.6, title = "Catégorie IUCN",
@@ -181,7 +184,7 @@ tmap_options(check.and.fix = TRUE)
 # On trie par années de création
 
 tmap_mode(mode = "view") 
-tm_shape(contour_senegal) +
+tm_shape(contour_sen) +
   tm_borders() + 
   tm_shape(WDPA_Senegal) + 
   tm_polygons(col = "STATUS_YR", alpha = 0.6, title = "Création d'aires protégées au Sénégal",
@@ -207,7 +210,7 @@ WDPA_Senegal_poly <- WDPA_Senegal %>%
 #Soucis au niveau de l'enregistrement en années
 
 tmap_mode(mode = "view") 
-tm_shape(contour_senegal) +
+tm_shape(contour_sen) +
   tm_borders() + 
   tm_shape(WDPA_Senegal_poly) + 
   tm_polygons(col = "STATUS_YR", alpha = 0.6, title = "Création d'aires protégées au Sénégal",
@@ -392,21 +395,13 @@ WDPA_terrain_AP <- WDPA_terrain %>%
   select(Nom = ORIG_NAME, 
          Surface = REP_AREA, 
          Aire_marine_terrestre = MARINE, 
-         mangrove_surface = mangrove_extent, 
-         indice_accidente = tri_mean, 
-         dist_ville = minutes_mean, 
-         altitude = elevation_mean) %>% 
+         Mangrove_surface = mangrove_extent, 
+         Couvert_foret = treecover) %>% 
   group_by(Nom) %>% 
-  mutate(indice_accidente = weighted.mean(indice_accidente, Surface,
-                                             na.rm = TRUE),
-            dist_ville = weighted.mean(dist_ville, Surface,
-                                       na.rm = TRUE),
-            altitude = weighted.mean(altitude, Surface,
-                                     na.rm = TRUE),
-            mangrove_surface = weighted.mean(mangrove_surface, Surface, 
-                                             na.rm = TRUE)) %>% 
+  mutate(Mangrove_surface = weighted.mean(Mangrove_surface), Surface, 
+         Couvert_foret = weighted.mean(Couvert_foret, Surface), 
+         na.rm = TRUE) %>% 
   unique() 
-  
 
 
 # Tableau 3 : Delta du Saloum ré-implantation de mangrove en 2003 (voir l'évolution? )
@@ -434,3 +429,72 @@ tableau_restauration <- WDPA_terrain %>%
 #   filter(Mangrove_surface == 0 & lead(Mangrove_surface) > 1000) 
 #   select(Nom, Année)
 
+?wdpa_fetch
+
+#Exo 1 : montrer les années 
+
+WDPA_terrain_AP %>% 
+  filter(Couvert_foret != 0 & Mangrove_surface != 0) %>% 
+  select(Nom)
+
+
+## 8. EXPLORATION DES DONNÉES AIRES PROTÉGÉES COUPLÉES AUX INDICATEURS ENVIRONNEMENTAUX
+
+Exercice 1 : quelles sont les aires protégées qui ont connu à la fois une augmentation du couvert forestier et de la surface de mangrove sur les deux dernières décénnies ? 
+  
+  ```{r}
+
+WDPA_terrain_AP %>% 
+  filter(Couvert_foret != 0 & Mangrove_surface != 0) %>%
+  select(Nom)
+
+```
+
+Exercice 2 : pour l'AMP de la Somone, afficher sa surface et les indicateurs correspondants 
+
+```{r}
+
+WDPA_Somone <-  WDPA_terrain_AP %>% 
+  filter(Nom == "Aire Marine Protégée de la Somone") %>% 
+  print()
+  
+```
+
+Piège : surface en km² alors que surface de la mangrove en Ha, on va donc modifier notre tableau pour convertir les Ha en km² 
+
+```{r}
+
+WDPA_terrain_AP$Surface_ha <- WDPA_terrain_AP$Surface * 100
+
+```
+
+Exercice 3 : créer une colonne présentant le pourcentage de mangrove par rapport à la superficie 
+
+```{r}
+WDPA_terrain_AP$Pourcentage_mangrove <- (WDPA_terrain_AP$Mangrove_surface / WDPA_terrain_AP$Surface_ha) * 100
+
+```
+Encore valeurs abbérantes à cause de l'affichage de la surface de mangrove, correction : (FAUX)
+
+```{r}
+WDPA_terrain_AP %>%
+  mutate(Mangrove_surface_Ha = as.numeric(gsub(",", "", Mangrove_surface))) %>%
+  mutate(Mangrove_surface_Ha = format(round(Mangrove_surface_Ha), big.mark = ","))
+
+rm(WDPA_terrain_AP)
+
+WDPA_terrain_AP %>%
+  mutate(Mangrove_surface = as.numeric(Mangrove_surface),
+         Surface_ha = as.numeric(Surface_ha),
+         Pourcent_mangrove = ifelse(Surface_ha != 0 & !is.na(Surface_ha), (Mangrove_surface / Surface_ha) * 100, 0))
+
+WDPA_terrain_pivot <- WDPA_terrain %>%
+  group_by(ORIG_NAME, year) %>%
+  summarise(treecover = mean(treecover, na.rm = TRUE)) %>% 
+  pivot_wider(names_from = year, values_from = treecover, values_fill = 0)
+
+
+WDPA_stats <- WDPA_stats %>%
+  mutate(Mangrove_surface = as.numeric(Mangrove_surface),
+         Surface_AP_Ha = as.numeric(Surface_AP_Ha),
+         Pourcent_mangrove = ifelse(Surface_AP_Ha != 0 & !is.na(Surface_AP_Ha), (Mangrove_surface / Surface_AP_Ha) * 100, 0))
