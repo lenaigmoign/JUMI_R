@@ -33,6 +33,19 @@ library(magrittr)
 WDPA_Senegal <- wdpa_fetch("Senegal", wait = TRUE, 
                           download_dir = "data/WDPA")
 
+
+WDPA_Senegal <- wdpa_read("C:/Users/Lenaig MOIGN/Documents/R/JUMI Officiel/data/WDPA/WDPA_Jun2023_SEN-shapefile.zip") 
+
+
+# Charger les shapefiles dans une liste
+liste_shapefiles <- lapply(chemins_shapefiles, st_read)
+
+# Attribuer un nom commun à la liste
+WDPA_Senegal <- "shapefiles"
+
+# Assigner la liste à un nom commun dans l'environnement de travail
+assign(WDPA_Senegal, liste_shapefiles)
+
 WDPA_Senegal %>%
   mutate(geom_type = st_geometry_type(.)) %>%  # Ajout d'une colonne pour les catégories de géométries
   group_by(geom_type) %>%  # Tri des données en fonction de leur catégorie  
@@ -498,3 +511,16 @@ WDPA_stats <- WDPA_stats %>%
   mutate(Mangrove_surface = as.numeric(Mangrove_surface),
          Surface_AP_Ha = as.numeric(Surface_AP_Ha),
          Pourcent_mangrove = ifelse(Surface_AP_Ha != 0 & !is.na(Surface_AP_Ha), (Mangrove_surface / Surface_AP_Ha) * 100, 0))
+
+
+
+library(mapme.biodiversity)
+detach("package:mapme.biodiversity", unload = TRUE)
+remove.packages("mapme.biodiversity")
+install.packages("remotes")
+new <- "https://github.com/fBedecarrats/mapme.biodiversity/tree/gfw_2017_to_2020"
+remotes::install_github(new, upgrade = "never")
+
+library(mapme.biodiversity)
+
+
