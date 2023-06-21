@@ -105,8 +105,6 @@ if (!file.exists("data/WDPA/WDPA_Jun2023_SEN-shapefile.zip")) {
 
 ```
 
-Aller lire la documentation et notamment la table attributaire pour comprendre le tableau
-
 ## 3. CHARGEMENT DES CONTOURS ADMINISTRATIFS
 
 ```{r}
@@ -119,6 +117,7 @@ Aller lire la documentation et notamment la table attributaire pour comprendre l
 contour_sen <- gadm(country = "Senegal", resolution = 1, level = 0, 
                      path = "data/GADM") %>%  
   st_as_sf() 
+
 ```
 
 ## 4. EXPLORATION DES DONNÉES DISPONIBLES SUR LES AIRES PROTÉGÉES
@@ -150,21 +149,6 @@ crs(contour_sen)
 crs(contour_sen) == crs(WDPA_Senegal)
 ```
 
-Pour aller plus loin : définir le système de projection de notre fichier
-
-```{r}
-
-# DÉFINIR OU REDÉFINIR A LA MAIN LA PROJECTION 
-
-# Si il manque la projection (absence de fichier .prj), 
-# alors on peut la spécifier à la main avec le package sf
-# EPSG 4326 = WSG 84 = le standard pour le web
-
-
-WDPA_Senegal <- st_read("data/GADM.shp", quiet = TRUE) %>% 
-  st_set_crs("EPSG:4326")  
-  
-```
 
 # POUR ALLER PLUS LOIN : CONNAÎTRE LES DONNÉES MANQUANTES
 
@@ -196,77 +180,6 @@ WDPA_Senegal %>%
 
 ```
 
-# POUR ALLER PLUS LOIN : SÉLECTIONNER LES DONNÉES AVE LES OPÉRATEURS
-
-Pour connaître les aires protégées créées en 2020 :
-
-```{r}
-
-WDPA_Senegal %>% 
-filter(STATUS_YR == 2020) %>% 
-select(NAME, DESIG)  
-
-```
-
-Pour connaître les aires protégées créées avant 1972 :
-
-```{r}
-
-WDPA_Senegal %>% 
-filter(STATUS_YR < 1972) %>% 
-select(NAME, DESIG) 
-
-# Dans le tableau WDPA, de nombreuses aires protégées enregistrent une année
-# de création égale à 0 (manque d'information). On rectifie notre filtration. 
-
-WDPA_Senegal %>% 
-  filter(STATUS_YR < 1972 & STATUS_YR != 0) %>% 
-  select(NAME, DESIG) 
-
-```
-
-Connaître les aires protégées créées par mandat présidentiel :
-
-```{r}
-
-# CRÉATION D'UNE COLONNE AVEC LES PÉRIODES DES TROIS MANDATS
-
-# Dans un premier temps, on doit créer une colonne pour définir les périodes 
-# On exclut les AP dont l'année de création n'est pas renseignée
-# On crée une colonne Periode que l'on divise en catégories de période
-# On exclut les valeurs NA correspondant aux années avant 1981 
-
-WDPA_mandats <- WDPA_Senegal %>%
-  filter(STATUS_YR != 0) %>% 
-  mutate(Periode = cut(STATUS_YR, breaks = c(1981, 2000, 2012, 2020),
-                       labels = c("1981-2000", "2000-2012", "2012-2020"),
-                       include.lowest = TRUE)) %>% 
-  filter(!is.na(Periode)) 
-
-# CALCULER L'EFFECTIF TOTAL D'AIRES PROTÉGÉES SUR LES 3 MANDATS 
-
-# On sélectionne les polygones dont l'année de création est renseignée
-# On groupe les données par période de création de l'aire protégée
-# On calcule le nombre d'observations pour chaque période 
-# On trie les données dans l'ordre croissant 
-
-AP_mandats <- WDPA_mandats %>%
-  filter(st_geometry_type(.) == "MULTIPOLYGON" & Periode != "NA") %>%
-  group_by(Periode) %>% 
-  summarise(Effectif_total = n()) %>%  
-  arrange(Periode) %>% #Tri des données par ordre croissant
-  mutate(Nom = c("ABDOU DIOUF", "ABDOULAYE WADE", "MACKY SALL"))
-
-# CRÉATION D'UN JOLI TABLEAU AVEC LE PACKAGE GT 
- 
-AP_mandats %>%
-  st_drop_geometry()%>% 
-  gt() %>%
-  cols_label(Periode = "Mandat", Effectif_total = "Nombre de création d'aires protégées", Nom = "Président") %>%
-  tab_header("Nombre de création d'aires protégées durant les derniers mandats présidentiels au Sénégal") %>%
-  tab_source_note("Source : Données du WDPA (juin 2023)")
-
-```
 
 # 5. PRODUIRE DES CARTES SYNTHÉTIQUES SUR LES AIRES PROTÉGÉES
 
@@ -291,84 +204,6 @@ tmap_options(check.and.fix = TRUE)
 
 ```
 
-# POUR ALLER PLUS LOIN : CHANGER LES VARIABLES AFFICHÉES
-
-Carte 2. En fonction de la catégorie IUCN
-
-```{r}
-
-tmap_mode(mode = "view") 
-
-tm_shape(contour_sen) +
-tm_borders() + 
-tm_shape(WDPA_Senegal) + 
-tm_polygons(col = "IUCN_CAT", alpha = 0.6, title = "Catégorie IUCN",
-            id = "NAME", 
-            popup.vars = c("Type" = "DESIG", 
-                            "Catégorie IUCN" = "IUCN_CAT",
-                            "Surface déclarée" = "REP_AREA",
-                            "Année du statut" = "STATUS_YR"))
-
-tmap_options(check.and.fix = TRUE)
-
-```
-
-Carte 3. En fonction de l'année de création
-
-```{r}
-
-# On sélectionne uniquement les champs qui sont renseignés dans la colonne STATUS_YR
-
-WDPA_Senegal_yr <- WDPA_Senegal %>% 
-  filter(STATUS_YR != 0)
-
-# Sur le rendu de la carte, une seule catégorie d'année apparaît 
-
-tm_shape(contour_sen) +
-  tm_borders() +
-  tm_shape(WDPA_Senegal_yr) +
-  tm_polygons(col = "STATUS_YR", alpha = 0.6, 
-              title = "Création d'aires protégées au Sénégal",
-              legend.format = list(big.mark = ""),
-              id = "NAME",
-              popup.vars = c("Type" = "DESIG",
-                             "Catégorie IUCN" = "IUCN_CAT",
-                             "Surface déclarée" = "REP_AREA"))
-
-```
-
-Carte 4. En fonction de la nature de l'aire protégée (marine/terrestre)
-
-```{r}
-
-# OPTION 1 : UTILISATION DU GÉO-TRAITEMENT DU PACKAGE SF 
-
-# On peut alors réaliser une intersection avec le contour administratif 
-# Pour avoir les aires protégées terrestres 
-# A l'inverse, on fait une différence avec les frontières pour obtenir 
-# Les aires marines
-
-PA_terrestre <- WDPA_Senegal %>%
-  st_intersection(contour_sen) 
-PA_marine <- WDPA_Senegal %>%
-  st_difference(contour_sen) 
-
-tm_shape(PA_terrestre) +
-  tm_polygons(col = "brown") +
-tm_shape(PA_marine) + 
-  tm_polygons(col = "blue")
-
-# OPTION 2 : UTILISATION DE LA TABLE D'ATTRIBUTS
-WDPA_Senegal %>%
-  mutate(MARINE = case_when(
-    MARINE == 0 ~ "Terrestres",
-    MARINE == 1 ~ "Côtières",
-    MARINE == 2 ~ "Marines")) %>%
-  tm_shape() + 
-  tm_polygons(col = "MARINE", alpha = 0.6, title = "Aires protégées")
-
-
-```
 
 ## 6. ACQUISITION DE DONNÉES ENVIRONNEMENTALES ET CALCUL D'INDICATEURS
 
@@ -428,20 +263,17 @@ Cela va régler des informations importantes qui sont nécessaires plus loin dan
 # Avant de créer le porte-feuille, on filtre notre couche WDPA 
 # L'idée est de ne garder que les données  pertinentes (années renseignées, 
 # et géométries de type polygone ou multi-polygone)
-
-WDPA_Senegal_poly <- WDPA_Senegal %>%
-  filter(STATUS_YR != 0) %>%
-  filter(st_geometry_type(geometry) != "MULTIPOINT")
-
 # Certaines aires protégées sont composées de plusieurs polygones disjoints  
 # On les scinde volontairement pour les traiter séparement 
 # Pour une analyse par AP, on pourra agréger les résultats
 
-WDPA_mapme <- WDPA_Senegal_poly %>% 
+WDPA_mapme <- WDPA_Senegal %>%
+  filter(STATUS_YR != 0) %>%
+  filter(st_geometry_type(geometry) != "MULTIPOINT") %>% 
   st_cast("POLYGON")
 
 WDPA_mapme <- init_portfolio(x = WDPA_mapme, 
-                                     years = 2000:2023,
+                                     years = 2000:2020,
                                      outdir = "data/mapme_Senegal",
                                      add_resources = TRUE,
                                      verbose = TRUE)
@@ -563,7 +395,7 @@ filter() opérateurs group_by()
 
 WDPA_stats_moyenne %>% 
   filter(Moyenne_couvert_foret != 0 & Moyenne_surface_mangrove != 0) %>%
-  group_by(Nom)
+  select(Nom)
 
 ```
 
@@ -627,10 +459,10 @@ tm_borders() +
 tm_shape(WDPA_stats) + 
 tm_polygons(col = "Couvert_foret", alpha = 0.6, title = "Couvert forestier des aires protégées en 2020 au Sénégal",
               id = "Nom",
-              legend.format = list(big.mark = ""),
-              popup.vars = c("Categorie" = "Categorie",
-                             "Surface déclarée" = "Surface",
-                             "Année de création " = "Annee_creation")) 
+              legend.format = list(big.mark = ""))
+              #popup.vars = c("Categorie" = "Categorie",
+                             #"Surface déclarée" = "Surface",
+                             #"Année de création " = "Annee_creation")) 
 ```
 
 (RECTIFIER LES ANNÉES)
