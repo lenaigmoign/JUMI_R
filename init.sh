@@ -1,3 +1,4 @@
+# it works
 WORK_DIR=/home/onyxia/work/JUMI_R
 
 git clone https://${GIT_PERSONAL_ACCESS_TOKEN}@github.com/lenaigmoign/JUMI_R.git
