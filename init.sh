@@ -19,4 +19,4 @@ echo \
             # To free the CTRL+Y shortcut for 'redo'
             }
             }, action = 'append')
-            " >> /home/work/.Rprofile
+            " >> /home/onyxia/work/.Rprofile
