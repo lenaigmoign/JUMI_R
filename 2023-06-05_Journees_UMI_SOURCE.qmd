@@ -53,7 +53,6 @@ librairies_req <- c("tidyverse",# Une série de packages pour faciliter la manip
                     "sf", # Pour faciliter la manipulation de données géographiques
                     "maptiles", # Pour télécharger des fonds de carte 
                     "geodata", # Pour télécharger simplement les frontières administratives
-                    "tidygeocoder", # Pour obtenir les coordonnées GPS d'un point à partir de son nom 
                     "tmap",# Pour produire de jolies cartes 
                     "wdpar", # Pour télécharger la base d'aires protégées WDPA
                     "mapme.biodiversity") # Pour importer et analyser des indicateurs de biodiversité
