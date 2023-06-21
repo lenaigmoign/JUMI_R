@@ -1,4 +1,4 @@
-WORK_DIR=/home/work/JUMI_R
+WORK_DIR=/home/onyxia/work/JUMI_R
 
 git clone https://${GIT_PERSONAL_ACCESS_TOKEN}@github.com/lenaigmoign/JUMI_R.git
 chown -R onyxia:users $WORK_DIR
@@ -19,4 +19,4 @@ echo \
             # To free the CTRL+Y shortcut for 'redo'
             }
             }, action = 'append')
-            " >> /home/onyxia/work/.Rprofile
+            " >> /home/work/.Rprofile
