@@ -16,11 +16,9 @@ editor_options:
 
 ## 1. OBJECTIFS DE LA FORMATION
 
-
-
 ## 2. FONCTIONNEMENT DE R STUDIO
 
-A - Interface console 
+A - Interface console
 
 B - Règles de code
 
@@ -32,7 +30,7 @@ Nom des variables : Utilisez des noms de variables descriptifs et significatifs 
 
 Commentaires : Utilisez des commentaires pour expliquer des parties complexes du code, des décisions importantes ou pour fournir des informations supplémentaires. Les commentaires aident à comprendre le code plus facilement, en particulier pour les autres personnes qui pourraient lire votre code ultérieurement.
 
-Espacement : Utilisez des espaces pour améliorer la lisibilité. Par exemple, utilisez des espaces autour des opérateurs (comme +, -, *, /) pour distinguer clairement les éléments.
+Espacement : Utilisez des espaces pour améliorer la lisibilité. Par exemple, utilisez des espaces autour des opérateurs (comme +, -, \*, /) pour distinguer clairement les éléments.
 
 Limitation de la longueur des lignes : Essayez de limiter la longueur de chaque ligne de code à environ 80 caractères. Si une ligne est trop longue, vous pouvez la diviser en plusieurs lignes en utilisant des indentations appropriées.
 
@@ -42,10 +40,9 @@ C- Raccourcis clavier(image)
 
 D- Fonctions qui vont être régulièrement utilées (select, mutate, filter, summarise)
 
-
 ## 3. INSTALLATION ET CHARGEMENT DES LIBRAIRIES R
 
-```{r install_librairies} 
+```{r install_librairies}
 
 # INSTALLATION DES LIBRAIRIES R 
 
@@ -77,11 +74,12 @@ library(lubridate)
 library(tmap)
 library(mapme.biodiversity)
 
+# webdriver::install_phantomjs()
 ```
 
 ## 2. CHARGEMENT DES DONNÉES SUR LES AIRES PROTÉGÉES
 
-L'initiative WDPA (World Database on Protected Areas) est un projet international visant à recueillir, à gérer et à diffuser des informations sur les aires protégées à travers le monde. 
+L'initiative WDPA (World Database on Protected Areas) est un projet international visant à recueillir, à gérer et à diffuser des informations sur les aires protégées à travers le monde.
 
 Cette initiative est coordonnée par l'UICN (Union internationale pour la conservation de la nature) et est soutenue par plusieurs partenaires et organisations internationales.
 
@@ -91,7 +89,6 @@ L'objectif principal de l'initiative WDPA est de fournir un outil fiable et acce
 
 La base de données WDPA est régulièrement mise à jour grâce à la contribution des pays, des organisations partenaires et des sources d'information disponibles. Elle est accessible en ligne et peut être consultée par le grand public, permettant ainsi une transparence et une diffusion des informations sur les aires protégées à l'échelle mondiale.
 
-
 ```{r}
 
 # TÉLÉCHARGEMENT DES DONNÉES DU WDPA AVEC LE PACKAGE WDPAR
@@ -99,17 +96,17 @@ La base de données WDPA est régulièrement mise à jour grâce à la contribut
 # On commence par importer les données libre d'accès, on les enregistre sur 
 # le disque local  
 
-WDPA_Senegal <- wdpa_fetch("Senegal", wait = TRUE, 
+if (!file.exists("data/WDPA/WDPA_Jun2023_SEN-shapefile.zip")) {
+  WDPA_Senegal <- wdpa_fetch("Senegal", wait = TRUE, 
                           download_dir = "data/WDPA") 
-
-# Enregistrement serveur local 
-
-WDPA_Senegal <- wdpa_read("data/WDPA/WDPA_Jun2023_SEN-shapefile.zip") 
-
+} else {
+  # Enregistrement serveur local 
+  WDPA_Senegal <- wdpa_read("data/WDPA/WDPA_Jun2023_SEN-shapefile.zip") 
+}
 
 ```
 
-Aller lire la documentation et notamment la table attributaire pour comprendre le tableau 
+Aller lire la documentation et notamment la table attributaire pour comprendre le tableau
 
 ## 3. CHARGEMENT DES CONTOURS ADMINISTRATIFS
 
@@ -123,12 +120,6 @@ Aller lire la documentation et notamment la table attributaire pour comprendre l
 contour_sen <- gadm(country = "Senegal", resolution = 1, level = 0, 
                      path = "data/GADM") %>%  
   st_as_sf() 
-
-# Ou on charge la version disponible localement au format compressé rds
-
-save(contour_sen, file = "data/GADM/contour_sen.rds") 
-str(contour_sen)
-
 ```
 
 ## 4. EXPLORATION DES DONNÉES DISPONIBLES SUR LES AIRES PROTÉGÉES
@@ -155,10 +146,12 @@ WDPA_Senegal %>%
 # CONNAÎTRE LE SYSTÈME DE PROJECTION 
 
 crs(WDPA_Senegal)
+crs(contour_sen)
 
+crs(contour_sen) == crs(WDPA_Senegal)
 ```
 
-Pour aller plus loin : définir le système de projection de notre fichier 
+Pour aller plus loin : définir le système de projection de notre fichier
 
 ```{r}
 
@@ -176,7 +169,7 @@ WDPA_Senegal <- st_read("data/GADM.shp", quiet = TRUE) %>%
 
 # POUR ALLER PLUS LOIN : CONNAÎTRE LES DONNÉES MANQUANTES
 
-Afin d'avoir un aperçu synthétique des données manquantes, il est possible d'exécuter les commandes suivantes : 
+Afin d'avoir un aperçu synthétique des données manquantes, il est possible d'exécuter les commandes suivantes :
 
 ```{r}
 
@@ -206,7 +199,7 @@ WDPA_Senegal %>%
 
 # POUR ALLER PLUS LOIN : SÉLECTIONNER LES DONNÉES AVE LES OPÉRATEURS
 
-Pour connaître les  aires protégées créées en 2020 : 
+Pour connaître les aires protégées créées en 2020 :
 
 ```{r}
 
@@ -233,7 +226,7 @@ WDPA_Senegal %>%
 
 ```
 
-Connaître les aires protégées créées par mandat présidentiel : 
+Connaître les aires protégées créées par mandat présidentiel :
 
 ```{r}
 
@@ -259,7 +252,7 @@ WDPA_mandats <- WDPA_Senegal %>%
 # On trie les données dans l'ordre croissant 
 
 AP_mandats <- WDPA_mandats %>%
-  filter(st_geometry_type(.) == "MULTIPOLYGON" & Periode != "NA") 
+  filter(st_geometry_type(.) == "MULTIPOLYGON" & Periode != "NA") %>%
   group_by(Periode) %>% 
   summarise(Effectif_total = n()) %>%  
   arrange(Periode) %>% #Tri des données par ordre croissant
@@ -299,9 +292,9 @@ tmap_options(check.and.fix = TRUE)
 
 ```
 
-# POUR ALLER PLUS LOIN : CHANGER LES VARIABLES AFFICHÉES 
+# POUR ALLER PLUS LOIN : CHANGER LES VARIABLES AFFICHÉES
 
-Carte 2. En fonction de la catégorie IUCN 
+Carte 2. En fonction de la catégorie IUCN
 
 ```{r}
 
@@ -321,7 +314,7 @@ tmap_options(check.and.fix = TRUE)
 
 ```
 
-Carte 3. En fonction de l'année de création 
+Carte 3. En fonction de l'année de création
 
 ```{r}
 
@@ -332,7 +325,7 @@ WDPA_Senegal_yr <- WDPA_Senegal %>%
 
 # Sur le rendu de la carte, une seule catégorie d'année apparaît 
 
-tm_shape(contour_senegal) +
+tm_shape(contour_sen) +
   tm_borders() +
   tm_shape(WDPA_Senegal_yr) +
   tm_polygons(col = "STATUS_YR", alpha = 0.6, 
@@ -367,14 +360,18 @@ tm_shape(PA_marine) +
   tm_polygons(col = "blue")
 
 # OPTION 2 : UTILISATION DE LA TABLE D'ATTRIBUTS
-
-tm_shape(WDPA_Senegal) + 
+WDPA_Senegal %>%
+  mutate(MARINE = case_when(
+    MARINE == 0 ~ "Terrestres",
+    MARINE == 1 ~ "Côtières",
+    MARINE == 2 ~ "Marines")) %>%
+  tm_shape() + 
   tm_polygons(col = "MARINE", alpha = 0.6, title = "Aires protégées")
 
 
 ```
 
-## 6. ACQUISITION DE DONNÉES ENVIRONNEMENTALES ET CALCUL D'INDICATEURS 
+## 6. ACQUISITION DE DONNÉES ENVIRONNEMENTALES ET CALCUL D'INDICATEURS
 
 # Le package mapme.biodiversity
 
@@ -390,7 +387,7 @@ help(package = "mapme.biodiversity")
 
 ```
 
-Le package permet de calculer, via une importation de données provenant de sources open data, des indicateurs, disponibles sur des intervalles de temps réguliers pour environ deux décennies (2020-2020). 
+Le package permet de calculer, via une importation de données provenant de sources open data, des indicateurs, disponibles sur des intervalles de temps réguliers pour environ deux décennies (2020-2020).
 
 Ces indicateurs permettent aux usagers d'analyser des dynamiques spatiales et temporelles relatives aux aires protégées. Pour connaître les ressources et les indicateurs associés disponibles :
 
@@ -411,13 +408,9 @@ A la lecture de la liste, l'utilisateur choisit quels sont les indicateurs qui l
 
 # Constitution d'un porte-feuille
 
-Une fois le choix effectué, il doit d'abord initier un portefeuille de la 
-biodiversité en utilisant un objet sf qui contient uniquement des géométries de 
-type "polygone" via l'appel de la fonction init_portfolio().
+Une fois le choix effectué, il doit d'abord initier un portefeuille de la biodiversité en utilisant un objet sf qui contient uniquement des géométries de type "polygone" via l'appel de la fonction init_portfolio().
 
-Il s'agit d'apporter un traitement spécifique à l'objet sf constitué de polygones. 
-Chaque ligne de l'objet est alors considérée comme un actif unique dans le portefeuille 
-pour lequel des indicateurs de biodiversité seront calculés plus loin dans la chaîne de traitement.
+Il s'agit d'apporter un traitement spécifique à l'objet sf constitué de polygones. Chaque ligne de l'objet est alors considérée comme un actif unique dans le portefeuille pour lequel des indicateurs de biodiversité seront calculés plus loin dans la chaîne de traitement.
 
 NB : Si les aires protégées sont de type multipolygone, on applique la fonction st_cast() pour considérer les polygones individuellement.
 
@@ -460,22 +453,19 @@ On récupère les données provenant des différentes sources d'open data et on 
 
 ```{r}
 
-# On se renseigne les indicateurs disponibles avec le package mapme.biodiversity
-
-available_indicators()  
-available_indicators(indicator = "treecover_area")
-
-
 # Données de Global Forest Watch (GFW) sur le couvert forestier
 
 WDPA_mapme <- get_resources(x = WDPA_mapme, 
                             resources = c("gfw_treecover", "gfw_lossyear"))
 
 # Calcul d'indicateurs GFW
-
-WDPA_mapme <- calc_indicators(WDPA_mapme,
+progressr::with_progress({ # Ceci sert à avoir une barre de progression
+  # Cette commande calcule les indicateurs à partir des ressources téléchargées
+  WDPA_mapme <- calc_indicators(WDPA_mapme,
                                     indicators = "treecover_area",
                                     min_cover = 30, min_size = 1)
+})
+
 ```
 
 Exercice 1 : importer les indicateurs sur la surface de mangrove
@@ -499,11 +489,9 @@ save(WDPA_mapme, file = "data/WDPA_indicators.rds")
 
 ```
 
-Exercice 2 : quelle est la différence entre les données GFW et GMW ? 
+Exercice 2 : quelle est la différence entre les données GFW et GMW ?
 
-GFW 2 indicateurs et GMW 1 indicateur 
-GFW observations continues sur 2020 à 2023 alors que GMW uniquement pour les périodes 1996, 2007-2010, 2015 et 2016
-
+GFW 2 indicateurs et GMW 1 indicateur GFW observations continues sur 2020 à 2023 alors que GMW uniquement pour les périodes 1996, 2007-2010, 2015 et 2016
 
 ## 7. TRI DES DONNÉES POUR FACILITER L'EXPLORATION
 
@@ -513,7 +501,7 @@ Cette imbrication n'est pas toujours indispensable. Par exemple, pour les cinq v
 
 On doit aussi se rappeler que les aires protégées sont parfois composées de plusieurs polygones disjoints et que mapme.biodiversity a calculé chaque indicateur pour chaque polygone séparément. Pour chaque aire protégée, on va donc faire la moyenne de ces indicateurs, pondérée par la surface respective de chaque polygone.
 
-# Désimbrication des indicateurs 
+# Désimbrication des indicateurs
 
 initialement sous forme de liste + expliquer pourquoi 2 unnest
 
@@ -529,10 +517,9 @@ WDPA_terrain <- WDPA_mapme %>%
 
 ```
 
-On obtient alors un tableau avec un nombre d'observations 
-important pour un même polygone. Pour un espace donné, plusieurs variables sont mesurées et sur des périodes de temps différentes. 
+On obtient alors un tableau avec un nombre d'observations important pour un même polygone. Pour un espace donné, plusieurs variables sont mesurées et sur des périodes de temps différentes.
 
-# Sélection des variables les plus pertinentes 
+# Sélection des variables les plus pertinentes
 
 Diminution du nombre de colonnes (A VOIR SI PERTINENT)
 
@@ -554,9 +541,7 @@ WDPA_stats <- WDPA_terrain %>%
 
 Exercice 3. A partir des données WDPA_stats : créer un tableau WDPA_stats_moyenne (avec l'assignation) et calculer pour chaque aire protégée, les moyennes de surface de mangrove et de couvert forestier
 
-Fonctions à utiliser : 
-group_by()
-summarize()
+Fonctions à utiliser : group_by() summarize()
 
 ```{r}
 
@@ -569,13 +554,11 @@ WDPA_stats_moyenne <- WDPA_stats %>%
 
 ## 8. EXPLORATION DES DONNÉES AIRES PROTÉGÉES COUPLÉES AUX INDICATEURS ENVIRONNEMENTAUX
 
-Exercice 4 : Quel est le nom des aires protégées qui ont à la fois de la forêt et de la mangrove dans leur périmètre ? 
+Exercice 4 : Quel est le nom des aires protégées qui ont à la fois de la forêt et de la mangrove dans leur périmètre ?
 
 Fonctions à utiliser :
 
-filter() 
-opérateurs
-group_by()
+filter() opérateurs group_by()
 
 ```{r}
 
@@ -585,10 +568,9 @@ WDPA_stats_moyenne %>%
 
 ```
 
-Exercice 5 : A partir du tableau WDPA_stats, afficher les données sur l'Aire Marine Protégée de la Somone 
+Exercice 5 : A partir du tableau WDPA_stats, afficher les données sur l'Aire Marine Protégée de la Somone
 
-Fonctions à utiliser : 
-filter()
+Fonctions à utiliser : filter()
 
 ```{r}
 
@@ -597,7 +579,7 @@ WDPA_Somone <-  WDPA_stats %>%
   
 ```
 
-Piège : superficie en km² alors que superficie de la mangrove en Ha, on va donc modifier notre tableau pour convertir les Ha en km² 
+Piège : superficie en km² alors que superficie de la mangrove en Ha, on va donc modifier notre tableau pour convertir les Ha en km²
 
 ```{r}
 
@@ -607,7 +589,7 @@ WDPA_stats <- WDPA_stats %>%
 
 ```
 
-# POUR ALLER PLUS LOIN : CALCUL DU POURCENTAGE DE MANGROVE ET DE FORET PAR POLYGONE 
+# POUR ALLER PLUS LOIN : CALCUL DU POURCENTAGE DE MANGROVE ET DE FORET PAR POLYGONE
 
 Création de colonnes présentant le pourcentage de mangrove et du couvert forestier par rapport à la superficie de l'aire protégée
 
@@ -620,7 +602,8 @@ WDPA_pourcentage <- WDPA_stats %>%
 
 ```
 
-# PRODUCTION D'UNE CARTE THÉMATIQUE SUR LE COUVERT FORESTIER PAR AIRE PROTÉGÉE 
+# PRODUCTION D'UNE CARTE THÉMATIQUE SUR LE COUVERT FORESTIER PAR AIRE PROTÉGÉE
+
 A. Création d'un tableau : couvert forestier par année et par aire protégée
 
 ```{r}
@@ -651,9 +634,9 @@ tm_polygons(col = "Couvert_foret", alpha = 0.6, title = "Couvert forestier des a
                              "Année de création " = "Annee_creation")) 
 ```
 
-(RECTIFIER LES ANNÉES)                          
+(RECTIFIER LES ANNÉES)
 
-Exercice 6. Produire la même carte avec la mangrove 
+Exercice 6. Produire la même carte avec la mangrove
 
 ```{r}
 
@@ -665,7 +648,7 @@ WDPA_mangrove <- WDPA_stats %>%
 
 ```
 
-Carte : 
+Carte :
 
 ```{r}
 tmap_mode(mode = "view") 
