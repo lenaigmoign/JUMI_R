@@ -1,7 +1,9 @@
+WORK_DIR=/home/work/JUMI_R
+
 git clone https://${GIT_PERSONAL_ACCESS_TOKEN}@github.com/lenaigmoign/JUMI_R.git
-chown -R onyxia:users ~/work/JUMI_R
-mc cp -r s3/fbedearrats/diffusion/JUMI/data ~/work/JUMI_R
-chown -R onyxia:users ~/work/JUMI_R
+chown -R onyxia:users $WORK_DIR
+mc cp -r s3/fbedearrats/diffusion/JUMI/data $WORK_DIR
+chown -R onyxia:users $WORK_DIR
 
 echo \
     "
