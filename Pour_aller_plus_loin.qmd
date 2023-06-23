@@ -3,6 +3,7 @@ title: "Les exercices à dérouler pour aller plus loin"
 format: html
 editor: visual
 ---
+
 Pour aller plus loin : définir le système de projection de notre fichier
 
 ```{r}
@@ -18,7 +19,6 @@ WDPA_Senegal <- st_read("data/GADM.shp", quiet = TRUE) %>%
   st_set_crs("EPSG:4326")  
   
 ```
-
 
 # POUR ALLER PLUS LOIN : SÉLECTIONNER LES DONNÉES AVE LES OPÉRATEURS
 
@@ -91,8 +91,6 @@ AP_mandats %>%
   tab_source_note("Source : Données du WDPA (juin 2023)")
 
 ```
-
-
 
 ## 4.EXPLORATION DES DONNEES DISPONIBLES SUR LES AIRES PROTEGEES
 
@@ -278,7 +276,6 @@ WDPA_Senegal %>%
 
 ```
 
-
 ## 7. SUPERPOSITION DES AIRES PROTEGEES
 
 ```{r}
@@ -393,3 +390,43 @@ tableau_restauration <- WDPA_terrain %>%
 # filter(Mangrove_surface == 0 & lead(Mangrove_surface) \> 1000)
 
 # select(Nom, Année)
+
+# POUR ALLER PLUS LOIN : CALCUL DU POURCENTAGE DE MANGROVE ET DE FORET PAR POLYGONE
+
+Création de colonnes présentant le pourcentage de mangrove et du couvert forestier par rapport à la superficie de l'aire protégée
+
+```{r}
+
+WDPA_pourcentage <- WDPA_stats %>%
+  mutate(Pourcent_mangrove = ifelse(Surface_AP_Ha != 0 & !is.na(Surface_AP_Ha), (Mangrove_surface / Surface_AP_Ha) * 100, 0),
+       Pourcent_foret = ifelse(Surface_AP_Ha != 0 & !is.na(Surface_AP_Ha), (Mangrove_surface / Surface_AP_Ha) * 100, 0)
+         )
+
+```
+
+
+
+Exercice 6. Produire la même carte avec la mangrove
+
+```{r}
+
+WDPA_mangrove <- WDPA_stats %>%
+  group_by(Nom) %>% 
+  summarise(Mangrove_surface = format(mean(Mangrove_surface, na.rm = TRUE), scientific = FALSE), 
+            Annee_creation = first(Annee_creation), 
+            Surface = first(Surface_AP_Ha))
+
+```
+
+
+```{r}
+
+WDPA_foret <- WDPA_stats %>%
+  group_by(Nom) %>% 
+  summarise(Couvert_foret = mean(Couvert_foret, na.rm = TRUE), 
+            Annee_creation = first(Annee_creation), 
+            Surface = first(Surface_AP_Ha))
+
+  # pivot_wider(names_from = year, values_from = treecover, values_fill = 0)
+
+```

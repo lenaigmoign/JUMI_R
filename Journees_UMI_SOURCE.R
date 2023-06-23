@@ -523,4 +523,9 @@ remotes::install_github(new, upgrade = "never")
 
 library(mapme.biodiversity)
 
+?tm_polygons()
+?gfw_lossyear
+
+# TEST IMPORTANT DONNEES PERTE FORESTIERE 
+
 
