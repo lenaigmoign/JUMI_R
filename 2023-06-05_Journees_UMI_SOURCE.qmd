@@ -37,6 +37,7 @@ Voici quelques règles générales à prendre en compte :
 -   Indentation : utilisez une indentation cohérente pour améliorer la lisibilité de votre code. Généralement, l'indentation est de deux espaces ou de quatre espaces, mais l'important est de choisir une convention et de s'y tenir tout au long du code.
 
 ```{r}
+#| eval: false 
 
 if (condition) {
   # Bloc de code conditionnel indenté
@@ -77,6 +78,8 @@ Lorsque vous travaillez dans R Studio, vous pouvez utiliser différents types d'
 
 ```{r}
 
+#| eval: false 
+
 a <- 10
 b <- 5
 
@@ -94,6 +97,8 @@ division_entiere <- a %/% b  # Division entière
 
 ```{r}
 
+#| eval: false 
+
 x <- 10
 y <- 5
 
@@ -110,6 +115,8 @@ superieur_egal <- x >= y  # Supérieur ou égal à
 
 ```{r}
 
+#| eval: false 
+
 p <- TRUE
 q <- FALSE
 
@@ -123,6 +130,8 @@ non_logique <- !p  # NON logique
 
 ```{r}
 
+#| eval: false 
+
 x <- 10  # Affectation simple
 y <- c(1, 2, 3)  # Affectation d'un vecteur
 
@@ -131,6 +140,8 @@ y <- c(1, 2, 3)  # Affectation d'un vecteur
 -   Opérateurs de concaténation
 
 ```{r}
+
+#| eval: false 
 
 prenom <- "John"
 nom <- "Doe"
@@ -142,6 +153,9 @@ concatenation <- paste(prenom, nom)  # Concaténation de chaînes de caractères
 -   Opérateurs d'indexation
 
 ```{r}
+
+#| eval: false 
+
 vecteur <- c(1, 2, 3, 4, 5)
 matrice <- matrix(1:9, nrow = 3)
 liste <- list(1, "a", TRUE)
@@ -530,15 +544,6 @@ Maintenant, il est possible d'explorer ces résultats en vue de les exploiter.
 
 Nous pouvons tout d'abord filter nos recherches sur une aire protégée. L'idéal serait donc d'avoir une aire protégée où il y a de la forêt et de la mangrove.
 
-```{r}
-
-# RECHERCHE D'AIRE PROTÉGÉE CONTENANT DE LA MANGROVE ET DE LA FORÊT
-
-WDPA_stats_moyenne %>% 
-  filter(Moyenne_couvert_foret != 0 & Moyenne_surface_mangrove != 0) %>%
-  select(Nom)
-
-```
 
 Exemple de la Basse-Casamance :
 
@@ -567,6 +572,7 @@ WDPA_stats <- WDPA_stats %>%
 
 Maintenant nous pouvons commencer quelques analyses avec par exemple, appliquer un traitement général pour obtenir un tableau synthétique qui résume l'état des indicateurs pour chaque aire protégée en 2019.
 
+
 ```{r}
 
 # A VOIR SI ON GARDE/SI ON AJOUTE % 
@@ -574,8 +580,23 @@ Maintenant nous pouvons commencer quelques analyses avec par exemple, appliquer 
 WDPA_stats_moyenne <- WDPA_stats %>% 
   filter(Annees_mangrove == 2019, Annees_f == 2019) %>% 
   group_by(Nom) %>%
-  summarize(Moyenne_surface_mangrove = format(mean(Mangrove_surface),scientific = FALSE),
+  summarize(Moyenne_surface_mangrove = format(mean(Mangrove_surface),
+                                              scientific = FALSE),
             Moyenne_couvert_foret = mean(Couvert_foret))
+
+```
+
+Suite :
+
+```{r}
+
+# RECHERCHE D'AIRE PROTÉGÉE CONTENANT DE LA MANGROVE ET DE LA FORÊT
+
+WDPA_stats_moyenne %>% 
+  st_drop_geometry() %>% 
+  filter(Moyenne_couvert_foret != 0 & Moyenne_surface_mangrove != 0) %>%
+  select(Nom) %>% 
+  gt()
 
 ```
 
@@ -597,9 +618,9 @@ tm_polygons(data = filter(WDPA_stats, Annees_f == 2020),
             col = "Couvert_foret", alpha = 0.6, title = "Couvert forestier 
             des aires protégées en 2020 au Sénégal",
               id = "Nom",
-              legend.format = list(big.mark = ""))
+              legend.format = list(big.mark = ""),
               popup.vars = c("Categorie" = "Categorie",
-                             "Surface déclarée" = "Surface_AP_HA",
+                             "Surface déclarée" = "Surface_AP_Ha",
                              "Année de création " = "Annee_creation")) 
 
 
@@ -611,17 +632,19 @@ Exemple avec de la mangrove :
 
 # CARTE SURFACE LE MANGROVE DES AIRES PROTEGEES EN 2020 
 
-tmap_mode(mode = "view") 
+
 tm_shape(contour_sen) +
 tm_borders() + 
 tm_shape(WDPA_stats) + 
 tm_polygons(data = filter(WDPA_stats, Annees_mangrove == 2020),
             col = "Mangrove_surface", alpha = 0.6, title = "Surface de mangrove 
             des aires protégées en 2020 au Sénégal",
-            palette = "greens",
+            palette = "Greens",
             id = "Nom",
-            legend.format = list(big.mark = ""))
+            legend.format = list(big.mark = ""),
             popup.vars = c("Categorie" = "Categorie",
                              "Surface déclarée" = "Surface_AP_Ha",
                              "Année de création " = "Annee_creation")) 
+
+#test import
 ```
