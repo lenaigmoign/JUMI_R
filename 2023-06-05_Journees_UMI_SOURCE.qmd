@@ -4,7 +4,7 @@ author: "Lenaïg MOIGN, Florent Bédécarrats"
 format:
   html:
     output-file: "index"
-    output-ext: "htm"
+    output-ext: "html"
     toc: true
 editor: visual
 execute:
@@ -36,7 +36,7 @@ Voici quelques règles générales à prendre en compte :
 
 -   Indentation : utilisez une indentation cohérente pour améliorer la lisibilité de votre code. Généralement, l'indentation est de deux espaces ou de quatre espaces, mais l'important est de choisir une convention et de s'y tenir tout au long du code.
 
-```{r}
+```{r identation}
 #| eval: false 
 
 if (condition) {
@@ -76,7 +76,7 @@ Lorsque vous travaillez dans R Studio, vous pouvez utiliser différents types d'
 
 -   Opérateurs arithmétiques
 
-```{r}
+```{r arithmetique}
 
 #| eval: false 
 
@@ -95,7 +95,7 @@ division_entiere <- a %/% b  # Division entière
 
 -   Opérateurs de comparaison
 
-```{r}
+```{r comparaison}
 
 #| eval: false 
 
@@ -113,7 +113,7 @@ superieur_egal <- x >= y  # Supérieur ou égal à
 
 -   Opérateurs logiques
 
-```{r}
+```{r logiques}
 
 #| eval: false 
 
@@ -128,7 +128,7 @@ non_logique <- !p  # NON logique
 
 -   Opérateurs d'affectation
 
-```{r}
+```{r affectation}
 
 #| eval: false 
 
@@ -139,7 +139,7 @@ y <- c(1, 2, 3)  # Affectation d'un vecteur
 
 -   Opérateurs de concaténation
 
-```{r}
+```{r concatenation}
 
 #| eval: false 
 
@@ -152,7 +152,7 @@ concatenation <- paste(prenom, nom)  # Concaténation de chaînes de caractères
 
 -   Opérateurs d'indexation
 
-```{r}
+```{r index}
 
 #| eval: false 
 
@@ -183,7 +183,8 @@ librairies_req <- c("tidyverse",# Une série de packages pour faciliter la manip
                     "geodata", # Pour télécharger simplement les frontières administratives
                     "tmap",# Pour produire de jolies cartes 
                     "wdpar", # Pour télécharger la base d'aires protégées WDPA
-                    "mapme.biodiversity") # Pour importer et analyser des indicateurs de biodiversité
+                    "remotes",
+                    "progressr") # Pour importer et analyser des indicateurs de biodiversité
 
 manquantes <- !(librairies_req %in% installed.packages())
 if (any(manquantes)) install.packages(librairies_req[manquantes])
@@ -199,6 +200,8 @@ library(gt)
 library(dplyr)
 library(lubridate)
 library(tmap)
+
+remotes::install_github("https://github.com/mapme-initiative/mapme.biodiversity.git")
 library(mapme.biodiversity)
 
 # webdriver::install_phantomjs()
@@ -215,7 +218,7 @@ La base de données WDPA constitue une source d'information complète sur les ai
 
 Elle rassemble des données sur les limites géographiques, les statuts juridiques, les catégories de gestion, la taille, la biodiversité, les écosystèmes et d'autres caractéristiques des aires protégées.
 
-```{r}
+```{r import_wdpa}
 
 # TÉLÉCHARGEMENT DES DONNÉES DU WDPA AVEC LE PACKAGE WDPAR
 
@@ -234,7 +237,7 @@ if (!file.exists("data/WDPA/WDPA_Jun2023_SEN-shapefile.zip")) {
 
 ## 3. CHARGEMENT DES CONTOURS ADMINISTRATIFS
 
-```{r}
+```{r import_contour_sen}
 
 # TÉLÉCHARGEMENT DES CONTOURS ADMINISTRATIFS AVEC LE PACKAGE GEODATA
 
@@ -255,7 +258,7 @@ On charge de l'information géographique, il est important de connaître les car
 
 Quels types de géométrie ? Quel système de projection ?
 
-```{r}
+```{r geometrie}
 
 # CONNAÎTRE LES GÉOMÉTRIES DE LA COUCHE (POINTS, LIGNES, POLYGONES) 
 
@@ -285,7 +288,7 @@ Pour rappel, la fonction gt() sert à produire de jolis tableaux. Elle arrive en
 
 La fonction pivot_long() doit être exécutée avant d'utiliser gt() car le package traite la donnée en format "long" et non en format "large" comme c'est le cas pour le moment dans l'objet WDPA Senegal.
 
-```{r}
+```{r donnees_manquantes}
 
 # CRÉER UN TABLEAU SYNTHÉTIQUE POUR AVOIR UNE VUE GLOBALE DES DONNÉES MANQUANTES
 
@@ -317,7 +320,7 @@ La table attributaire du WDPA est suffisamment renseignée pour pouvoir produire
 
 Carte 1. Les différentes catégories d'aires protégées au Sénégal d'après les données satellitaires du WDPA ;
 
-```{r}
+```{r carte_aires_prot}
 
 # PRODUCTION DE CARTES THÉMATIQUES ET ESTHÉTIQUES AVEC LE PACKAGE TMAP
 
@@ -359,7 +362,7 @@ Ces indicateurs permettent aux usagers d'analyser des dynamiques spatiales et te
 
 Pour connaître les ressources et les indicateurs associés disponibles :
 
-```{r}
+```{r dispo_indicateurs}
 
 available_resources()
 
@@ -424,7 +427,7 @@ En créant le portefeuille, certaines vérifications préliminaires seront autom
 
 Certains paramètres globaux du portefeuille, tels que le répertoire de sortie pour les ensembles de données téléchargés, un répertoire temporaire pour les calculs intermédiaires, peuvent être définis par l'utilisateur pour avoir un contrôle plus précis du flux de travail. Cependant, ces paramètres sont également définis sur des valeurs par défaut sensibles et peuvent donc être omis lors de l'initialisation du portefeuille.
 
-```{r}
+```{r portefeuille}
 
 # EXÉCUTION DE LA FONCTION INIT_PORTFOLIO 
 
@@ -452,7 +455,7 @@ Une fois le porte-feuille lancé, on peut récupérer les données de notre int�
 
 1- Le couvert forestier avec Global Forest Watch (GFW)
 
-```{r}
+```{r deforestation}
 
 # Données de Global Forest Watch (GFW) sur le couvert forestier
 
@@ -471,7 +474,7 @@ progressr::with_progress({ # Ceci sert à avoir une barre de progression
 
 2- La surface de mangroves avec Global Mangrove Watch (GMW)
 
-```{r}
+```{r mangrove}
 
 # Données de Global Mangrove Watch (GMW) sur la surface de mangroves 
 
@@ -502,7 +505,7 @@ On doit aussi se rappeler que les aires protégées sont parfois composées de p
 
 Nous appelerons ce tableau WDPA_terrain :
 
-```{r}
+```{r desimbrication}
 
 # DÉSIMBRICATION DES LISTES D'INDICATEURS 
 
@@ -520,7 +523,7 @@ On obtient alors un tableau avec un nombre d'observations important pour un mêm
 
 Nous faisons le choix de ne garder que certaines variables. Ce choix dépend directement de l'analyse statistique que nous voulons faire derrière.
 
-```{r}
+```{r tableau_stats}
 
 # SÉLECTION DES VARIABLES PERTINENTES 
 
@@ -544,10 +547,9 @@ Maintenant, il est possible d'explorer ces résultats en vue de les exploiter.
 
 Nous pouvons tout d'abord filter nos recherches sur une aire protégée. L'idéal serait donc d'avoir une aire protégée où il y a de la forêt et de la mangrove.
 
-
 Exemple de la Basse-Casamance :
 
-```{r}
+```{r basse_casamance}
 
 # ÉTAT DES INDICATEURS EN BASSE CASAMANCE 
 
@@ -560,7 +562,7 @@ On remarque alors que la *superficie des aires protégées est en km²* alors qu
 
 Cet exemple confirme **l'importance de lire la documentation** avant d'utiliser des données.
 
-```{r}
+```{r ap_nouvelle_surface}
 
 # CRÉATION D'UNE COLONNE SURFACE EN HA
 
@@ -572,8 +574,7 @@ WDPA_stats <- WDPA_stats %>%
 
 Maintenant nous pouvons commencer quelques analyses avec par exemple, appliquer un traitement général pour obtenir un tableau synthétique qui résume l'état des indicateurs pour chaque aire protégée en 2019.
 
-
-```{r}
+```{r indicateurs_2019}
 
 # A VOIR SI ON GARDE/SI ON AJOUTE % 
 
@@ -588,7 +589,7 @@ WDPA_stats_moyenne <- WDPA_stats %>%
 
 Suite :
 
-```{r}
+```{r liste_foret_mangrove}
 
 # RECHERCHE D'AIRE PROTÉGÉE CONTENANT DE LA MANGROVE ET DE LA FORÊT
 
@@ -606,7 +607,7 @@ Nous souhaiterions maintenant créer une carte comme cela a déjà été fait pr
 
 Si nous commençons avec le couvert forestier, il faut d'abord créer un nouvel objet *WDPA_foret* qui synthétise les valeurs par année et par aire protégée.
 
-```{r}
+```{r carte_foret_2019}
 
 # CARTE COUVERT FORESTIER 2020 (VOIR POUR RENOMMER COUVERT_FORET)
 
@@ -628,7 +629,7 @@ tm_polygons(data = filter(WDPA_stats, Annees_f == 2020),
 
 Exemple avec de la mangrove :
 
-```{r}
+```{r carte_mangrove_2019}
 
 # CARTE SURFACE LE MANGROVE DES AIRES PROTEGEES EN 2020 
 
@@ -647,4 +648,5 @@ tm_polygons(data = filter(WDPA_stats, Annees_mangrove == 2020),
                              "Année de création " = "Annee_creation")) 
 
 #test import
+
 ```
