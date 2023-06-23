@@ -484,11 +484,10 @@ WDPA_mapme <- get_resources(x = WDPA_mapme,resources = "gmw")
 
 
 # Calcul des indicateurs GMW
-
-WDPA_mapme <- calc_indicators(WDPA_mapme,
-                              indicators = "mangroves_area")
-                            
-
+progressr::with_progress({ 
+  WDPA_mapme <- calc_indicators(WDPA_mapme,
+                                indicators = "mangroves_area")
+})
 # ENREGISTREMENT DES DONNÉES GFW + GMW SUR 1 FICHIER RDS
 
 save(WDPA_mapme, file = "data/WDPA_indicators.rds") 
