@@ -6,6 +6,7 @@ format:
     output-file: "index"
     output-ext: "html"
     toc: true
+    embed-resources: true
 editor: visual
 execute:
   warning: false
