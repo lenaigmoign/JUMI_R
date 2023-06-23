@@ -282,7 +282,7 @@ crs(contour_sen) == crs(WDPA_Senegal)
 
 ```
 
-# POUR ALLER PLUS LOIN : CONNAÎTRE LES DONNÉES MANQUANTES
+# CONNAÎTRE LES DONNÉES MANQUANTES
 
 Afin d'avoir un aperçu synthétique des données manquantes, il est possible d'exécuter les commandes suivantes.
 
@@ -615,18 +615,19 @@ Si nous commençons avec le couvert forestier, il faut d'abord créer un nouvel 
 #| eval: true
 # CARTE COUVERT FORESTIER 2020 (VOIR POUR RENOMMER COUVERT_FORET)
 
-tmap_mode(mode = "view") 
+WDPA_foret_2020 <- WDPA_stats %>% 
+  filter(Annees_f == 2020)
+
 tm_shape(contour_sen) +
 tm_borders() + 
-tm_shape(WDPA_stats) + 
-tm_polygons(data = filter(WDPA_stats, Annees_f == 2020),
-            col = "Couvert_foret", alpha = 0.6, title = "Couvert forestier 
+tm_shape(WDPA_foret_2020) + 
+tm_polygons(col = "Couvert_foret", alpha = 0.6, title = "Couvert forestier 
             des aires protégées en 2020 au Sénégal",
               id = "Nom",
-              legend.format = list(big.mark = ""),
-              popup.vars = c("Categorie" = "Categorie",
-                             "Surface déclarée" = "Surface_AP_Ha",
-                             "Année de création " = "Annee_creation")) 
+              legend.format = list(big.mark = ""))
+              #popup.vars = c("Categorie" = "Categorie",
+                             #"Surface déclarée" = "Surface",
+                             #"Année de création " = "Annee_creation")) 
 
 
 ```
@@ -637,12 +638,13 @@ Exemple avec de la mangrove :
 #| eval: true
 # CARTE SURFACE LE MANGROVE DES AIRES PROTEGEES EN 2020 
 
+WDPA_mangrove_2020 <- WDPA_stats %>% 
+  filter(Annees_mangrove == 2020)
 
 tm_shape(contour_sen) +
 tm_borders() + 
-tm_shape(WDPA_stats) + 
-tm_polygons(data = filter(WDPA_stats, Annees_mangrove == 2020),
-            col = "Mangrove_surface", alpha = 0.6, title = "Surface de mangrove 
+tm_shape(WDPA_mangrove_2020) + 
+tm_polygons(col = "Mangrove_surface", alpha = 0.6, title = "Surface de mangrove 
             des aires protégées en 2020 au Sénégal",
             palette = "Greens",
             id = "Nom",
@@ -651,6 +653,5 @@ tm_polygons(data = filter(WDPA_stats, Annees_mangrove == 2020),
                              "Surface déclarée" = "Surface_AP_Ha",
                              "Année de création " = "Annee_creation")) 
 
-#test import
 
 ```
