@@ -464,14 +464,18 @@ Une fois le porte-feuille lancé, on peut récupérer les données de notre int�
 WDPA_mapme <- get_resources(x = WDPA_mapme, 
                             resources = c("gfw_treecover", "gfw_lossyear"))
 
-# Calcul d'indicateurs GFW
-progressr::with_progress({ # Ceci sert à avoir une barre de progression
-  # Cette commande calcule les indicateurs à partir des ressources téléchargées
-  WDPA_mapme <- calc_indicators(WDPA_mapme,
-                                    indicators = "treecover_area",
-                                    min_cover = 30, min_size = 1)
-})
-
+if (file.exists("WDPA_mapme_foret.rds")) {
+  WDPA_mapme <- read_rds("WDPA_mapme_foret.rds")
+} else {
+  # Calcul d'indicateurs GFW
+  progressr::with_progress({ # Ceci sert à avoir une barre de progression
+    # Cette commande calcule les indicateurs à partir des ressources téléchargées
+    WDPA_mapme <- calc_indicators(WDPA_mapme,
+                                  indicators = "treecover_area",
+                                  min_cover = 30, min_size = 1)
+  })
+  write_rds(WDPA_mapme, "WDPA_mapme_foret.rds")
+}
 ```
 
 2- La surface de mangroves avec Global Mangrove Watch (GMW)
