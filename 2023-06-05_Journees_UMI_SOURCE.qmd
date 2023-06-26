@@ -36,24 +36,6 @@ Lorsque vous travaillez sur RStudio, il est recommandé de suivre certaines règ
 
 Voici quelques règles générales à prendre en compte :
 
--   Indentation : utilisez une indentation cohérente pour améliorer la lisibilité de votre code. Généralement, l'indentation est de deux espaces ou de quatre espaces, mais l'important est de choisir une convention et de s'y tenir tout au long du code.
-
-```{r identation}
-#| eval: false 
-
-if (condition) {
-  # Bloc de code conditionnel indenté
-  for (i in 1:10) {
-    # Bloc de code de boucle indenté
-    print(i)
-  }
-} else {
-  # Autre bloc de code indenté
-  message("La condition est fausse.")
-}
-
-```
-
 -   Nom des variables : Utilisez des noms de variables descriptifs et significatifs pour améliorer la compréhension du code. Évitez les noms de variables trop courts ou cryptiques. Utilisez des noms en minuscules avec des mots séparés par des underscores pour une meilleure lisibilité.
 
 -   Commentaires : Utilisez des commentaires pour expliquer des parties complexes du code, des décisions importantes ou pour fournir des informations supplémentaires. Les commentaires aident à comprendre le code plus facilement, en particulier pour les autres personnes qui pourraient lire votre code ultérieurement.
@@ -64,111 +46,28 @@ if (condition) {
 
 -   Utilisation de parenthèses : Utilisez des parenthèses pour regrouper les expressions complexes et améliorer la lisibilité.Cela aide également à éviter toute ambiguïté dans les opérations.
 
+-   Indentation : utilisez une indentation cohérente pour améliorer la lisibilité de votre code. Généralement, l'indentation est de deux espaces ou de quatre espaces, mais l'important est de choisir une convention et de s'y tenir tout au long du code. Des exemples sont fournis à la fin du notebook, dans la partie "pour aller plus loin".
+
 C- Raccourcis clavier(image)
 
 D- Fonctions qui vont être régulièrement utilées
 
-select () mutate () filter () summarise()
+select () 
+mutate () 
+filter () 
+summarise()
 
 E- Opérateurs
 
 R Studio est un environnement de développement intégré (IDE) spécialement conçu pour le langage de programmation R.
 
-Lorsque vous travaillez dans R Studio, vous pouvez utiliser différents types d'opérateurs pour effectuer des opérations mathématiques, logiques et de manipulation de données. Voici quelques-uns des opérateurs les plus couramment utilisés en R :
-
--   Opérateurs arithmétiques
-
-```{r arithmetique}
-
-#| eval: false 
-
-a <- 10
-b <- 5
-
-addition <- a + b  # Addition
-soustraction <- a - b  # Soustraction
-multiplication <- a * b  # Multiplication
-division <- a / b  # Division
-modulo <- a %% b  # Modulo
-exponentiation <- a ^ b  # Exponentiation
-division_entiere <- a %/% b  # Division entière
-
-```
-
--   Opérateurs de comparaison
-
-```{r comparaison}
-#| eval: false 
-
-x <- 10
-y <- 5
-
-egalite <- x == y  # Égalité
-difference <- x != y  # Différence
-inferieur <- x < y  # Inférieur à
-inferieur_egal <- x <= y  # Inférieur ou égal à
-superieur <- x > y  # Supérieur à
-superieur_egal <- x >= y  # Supérieur ou égal à
-
-```
-
--   Opérateurs logiques
-
-```{r logiques}
-#| eval: false 
-
-p <- TRUE
-q <- FALSE
-
-et_logique <- p & q  # ET logique
-ou_logique <- p | q  # OU logique
-non_logique <- !p  # NON logique
-
-```
-
--   Opérateurs d'affectation
-
-```{r affectation}
-#| eval: false 
-
-x <- 10  # Affectation simple
-y <- c(1, 2, 3)  # Affectation d'un vecteur
-
-```
-
--   Opérateurs de concaténation
-
-```{r concatenation}
-#| eval: false 
-
-prenom <- "John"
-nom <- "Doe"
-
-concatenation <- paste(prenom, nom)  # Concaténation de chaînes de caractères
-
-```
-
--   Opérateurs d'indexation
-
-```{r index}
-#| eval: false 
-
-vecteur <- c(1, 2, 3, 4, 5)
-matrice <- matrix(1:9, nrow = 3)
-liste <- list(1, "a", TRUE)
-
-element1 <- vecteur[2]  # Indexation d'un élément dans un vecteur
-sous_vecteur <- vecteur[2:4]  # Indexation d'un sous-vecteur
-element_matrice <- matrice[2, 3]  # Indexation d'un élément dans une matrice
-sous_matrice <- matrice[1:2, 2:3]  # Indexation d'une sous-matrice
-element_liste <- liste[[2]]  # Indexation d'un élément dans une liste
-
-```
+Lorsque vous travaillez dans R Studio, vous pouvez utiliser différents types d'opérateurs pour effectuer des opérations mathématiques, logiques et de manipulation de données. Les exemples des opérateurs les plus courants sont développés dans la partie "pour aller plus loin". 
 
 ## 3. INSTALLATION ET CHARGEMENT DES LIBRAIRIES R
 
 ```{r install_librairies}
 #| eval: true
+
 # INSTALLATION DES LIBRAIRIES R 
 
 librairies_req <- c("tidyverse",# Une série de packages pour faciliter la manipulation de données
@@ -210,7 +109,7 @@ library(mapme.biodiversity)
 
 ```
 
-## 2. CHARGEMENT DES DONNÉES SUR LES AIRES PROTÉGÉES
+## 4. CHARGEMENT DES DONNÉES SUR LES AIRES PROTÉGÉES
 
 L'initiative WDPA (World Database on Protected Areas) est un projet international visant à recueillir, à gérer et à diffuser des informations sur les aires protégées à travers le monde.
 
@@ -221,6 +120,7 @@ La base de données WDPA constitue une source d'information complète sur les ai
 Elle rassemble des données sur les limites géographiques, les statuts juridiques, les catégories de gestion, la taille, la biodiversité, les écosystèmes et d'autres caractéristiques des aires protégées.
 
 ```{r import_wdpa}
+
 #| eval: true
 # TÉLÉCHARGEMENT DES DONNÉES DU WDPA AVEC LE PACKAGE WDPAR
 
@@ -237,7 +137,7 @@ if (!file.exists("data/WDPA/WDPA_Jun2023_SEN-shapefile.zip")) {
 
 ```
 
-## 3. CHARGEMENT DES CONTOURS ADMINISTRATIFS
+## 5. CHARGEMENT DES CONTOURS ADMINISTRATIFS
 
 ```{r import_contour_sen}
 #| eval: true
@@ -246,13 +146,19 @@ if (!file.exists("data/WDPA/WDPA_Jun2023_SEN-shapefile.zip")) {
 # On commence par importer les données libre d'accès, on les enregistre sur 
 # le disque local et on les convertit au format standardisé sf 
 
+if (!file.exists("data/GADM/contour_sen.rds")) {
 contour_sen <- gadm(country = "Senegal", resolution = 1, level = 0, 
                      path = "data/GADM") %>%  
   st_as_sf() 
+  
+} else {
+  # Enregistrement serveur local 
+  contour_sen <- read_rds("data/GADM/contour_sen.rds")
+}
 
 ```
 
-## 4. EXPLORATION DES DONNÉES DISPONIBLES SUR LES AIRES PROTÉGÉES
+## 6. EXPLORATION DES DONNÉES DISPONIBLES SUR LES AIRES PROTÉGÉES
 
 # CARACTÉRISTIQUES SPATIALES
 
@@ -316,7 +222,7 @@ WDPA_Senegal %>%
 
 ```
 
-# 5. PRODUIRE DES CARTES SYNTHÉTIQUES SUR LES AIRES PROTÉGÉES
+# 7. PRODUIRE DES CARTES SYNTHÉTIQUES SUR LES AIRES PROTÉGÉES
 
 La table attributaire du WDPA est suffisamment renseignée pour pouvoir produire des cartes thématiques pour mettre en avant une variable de notre jeu de données.
 
@@ -327,6 +233,7 @@ Carte 1. Les différentes catégories d'aires protégées au Sénégal d'après 
 # PRODUCTION DE CARTES THÉMATIQUES ET ESTHÉTIQUES AVEC LE PACKAGE TMAP
 
 tmap_mode(mode = "view") 
+
 tm_shape(contour_sen) +
   tm_borders() + 
   tm_shape(WDPA_Senegal) + 
@@ -342,7 +249,7 @@ tmap_options(check.and.fix = TRUE)
 
 ```
 
-## 6. ACQUISITION DE DONNÉES ENVIRONNEMENTALES ET CALCUL D'INDICATEURS
+## 8. ACQUISITION DE DONNÉES ENVIRONNEMENTALES ET CALCUL D'INDICATEURS
 
 # Le package mapme.biodiversity
 
@@ -474,8 +381,10 @@ if (file.exists("WDPA_mapme_foret.rds")) {
                                   indicators = "treecover_area",
                                   min_cover = 30, min_size = 1)
   })
+  
   write_rds(WDPA_mapme, "WDPA_mapme_foret.rds")
 }
+
 ```
 
 2- La surface de mangroves avec Global Mangrove Watch (GMW)
@@ -487,11 +396,19 @@ if (file.exists("WDPA_mapme_foret.rds")) {
 WDPA_mapme <- get_resources(x = WDPA_mapme,resources = "gmw")
 
 
-# Calcul des indicateurs GMW
+if (file.exists("WDPA_mapme_mangrove.rds")) {
+  WDPA_mapme <- read_rds("WDPA_mapme_mangrove.rds")
+} else {
+  # Calcul des indicateurs GMW
 progressr::with_progress({ 
   WDPA_mapme <- calc_indicators(WDPA_mapme,
                                 indicators = "mangroves_area")
-})
+  })
+
+  write_rds(WDPA_mapme, "WDPA_mapme_mangrove.rds")
+
+}
+
 # ENREGISTREMENT DES DONNÉES GFW + GMW SUR 1 FICHIER RDS
 
 save(WDPA_mapme, file = "data/WDPA_indicators.rds") 
@@ -545,11 +462,49 @@ WDPA_stats <- WDPA_terrain %>%
 
 ```
 
-## 8. EXPLORATION DES DONNÉES AIRES PROTÉGÉES COUPLÉES AUX INDICATEURS ENVIRONNEMENTAUX
+## 9. EXPLORATION DES DONNÉES AIRES PROTÉGÉES COUPLÉES AUX INDICATEURS ENVIRONNEMENTAUX
 
 Maintenant, il est possible d'explorer ces résultats en vue de les exploiter.
 
-Nous pouvons tout d'abord filter nos recherches sur une aire protégée. L'idéal serait donc d'avoir une aire protégée où il y a de la forêt et de la mangrove.
+Nous pouvons commencer avec une analyse globale où nous cherchons par exemple à connaître l'état 
+des indicateurs sur une année précise. Quelle est la surface moyenne de forêt et de mangrove en 2020 au sein de chaque aire protégée ? 
+
+```{r indicateurs_2020}
+#| eval: true
+
+# RÉSULTATS SUR UNE ANNÉE (2020)
+
+# On filtre d'abord les résultats à l'aide des opérateurs pour ne garder 
+# que l'année 2020, on regroupe ensuite les données par Nom (pour avoir le 
+# résultat par aire protégée) puis on calcule la moyenne pour l'ensemble
+# des polygones 
+
+WDPA_moyenne_2020 <- WDPA_stats %>% 
+  filter(Annees_mangrove == 2020, Annees_f == 2020) %>% 
+  group_by(Nom) %>%
+  summarize(Moyenne_surface_mangrove = format(mean(Mangrove_surface),
+                                              scientific = FALSE),
+            Moyenne_couvert_foret = mean(Couvert_foret)) 
+  
+
+```
+
+Nous pouvons aussi filter nos recherches sur une aire protégée. L'idéal serait d'avoir une aire protégée où il y a de la forêt et de la mangrove. Au lieu d'appliquer ces conditions sur l'ensemble du jeu de données, afin de gagner du temps, on choisit de se focaliser sur 2019.
+
+```{r liste_foret_mangrove}
+#| eval: true
+
+# RECHERCHE D'AIRE PROTÉGÉE CONTENANT DE LA MANGROVE ET DE LA FORÊT
+
+WDPA_moyenne_2020 %>% 
+  st_drop_geometry() %>% 
+  filter(Moyenne_couvert_foret != 0 & Moyenne_surface_mangrove != 0) %>%
+  select(Nom) %>% 
+  gt()
+
+```
+
+Maintenant qu'on a obtenu la liste des aires protégées ayant de la forêt et de la mangrove, nous pouvons revenir à notre tableau précédent et nous focaliser sur une zone d'intérêt.
 
 Exemple de la Basse-Casamance :
 
@@ -571,39 +526,11 @@ Cet exemple confirme **l'importance de lire la documentation** avant d'utiliser 
 # CRÉATION D'UNE COLONNE SURFACE EN HA
 
 WDPA_stats <- WDPA_stats %>%
-  mutate(Surface_AP_Ha = Surface * 100) %>%
+  mutate(Surface_ha = Surface * 100) %>%
   select(-Surface)
 
 ```
 
-Maintenant nous pouvons commencer quelques analyses avec par exemple, appliquer un traitement général pour obtenir un tableau synthétique qui résume l'état des indicateurs pour chaque aire protégée en 2019.
-
-```{r indicateurs_2019}
-#| eval: true
-# A VOIR SI ON GARDE/SI ON AJOUTE % 
-
-WDPA_stats_moyenne <- WDPA_stats %>% 
-  filter(Annees_mangrove == 2019, Annees_f == 2019) %>% 
-  group_by(Nom) %>%
-  summarize(Moyenne_surface_mangrove = format(mean(Mangrove_surface),
-                                              scientific = FALSE),
-            Moyenne_couvert_foret = mean(Couvert_foret))
-
-```
-
-Suite :
-
-```{r liste_foret_mangrove}
-#| eval: true
-# RECHERCHE D'AIRE PROTÉGÉE CONTENANT DE LA MANGROVE ET DE LA FORÊT
-
-WDPA_stats_moyenne %>% 
-  st_drop_geometry() %>% 
-  filter(Moyenne_couvert_foret != 0 & Moyenne_surface_mangrove != 0) %>%
-  select(Nom) %>% 
-  gt()
-
-```
 
 # PRODUCTION D'UNE CARTE THÉMATIQUE SUR LE COUVERT FORESTIER PAR AIRE PROTÉGÉE
 
@@ -615,8 +542,12 @@ Si nous commençons avec le couvert forestier, il faut d'abord créer un nouvel 
 #| eval: true
 # CARTE COUVERT FORESTIER 2020 (VOIR POUR RENOMMER COUVERT_FORET)
 
+# On filtre les données que l'on veut présenter sur la carte, à savoir l'année
+
 WDPA_foret_2020 <- WDPA_stats %>% 
   filter(Annees_f == 2020)
+
+# On utilise les fonctionnalités du package tmap()
 
 tm_shape(contour_sen) +
 tm_borders() + 
@@ -624,10 +555,10 @@ tm_shape(WDPA_foret_2020) +
 tm_polygons(col = "Couvert_foret", alpha = 0.6, title = "Couvert forestier 
             des aires protégées en 2020 au Sénégal",
               id = "Nom",
-              legend.format = list(big.mark = ""))
-              #popup.vars = c("Categorie" = "Categorie",
-                             #"Surface déclarée" = "Surface",
-                             #"Année de création " = "Annee_creation")) 
+              legend.format = list(big.mark = ""),
+              popup.vars = c("Catégorie" = "Categorie",
+                             "Surface déclarée" = "Surface_ha",
+                             "Année de création " = "Annee_creation"))
 
 
 ```
@@ -649,9 +580,140 @@ tm_polygons(col = "Mangrove_surface", alpha = 0.6, title = "Surface de mangrove
             palette = "Greens",
             id = "Nom",
             legend.format = list(big.mark = ""),
-            popup.vars = c("Categorie" = "Categorie",
-                             "Surface déclarée" = "Surface_AP_Ha",
-                             "Année de création " = "Annee_creation")) 
+            popup.vars = c("Catégorie" = "Categorie",
+                             "Surface déclarée" = "Surface_ha",
+                             "Année de création" = "Annee_creation")) 
 
 
 ```
+
+
+## 10. POUR ALLER PLUS LOIN : 
+
+Exemple d'intentation : 
+
+```{r identation}
+#| eval: false 
+
+# Pas bien : difficile a lire
+if (a>0){
+b <- a^2
+if (b>4){
+c <- log(b)
+}else{
+c <- exp(b)
+}
+}else{
+b <- -a^2 + 3
+c <- NULL
+}
+
+# Bien : lisible (il suffit de faire CTRL+I)
+if (a>0){
+  b <- a^2
+  if (b>4){
+    c <- log(b)
+  }else{
+    c <- exp(b)
+  }
+}else{
+  b <- -a^2 + 3
+  c <- NULL
+}
+
+```
+
+Exemple d'opérateurs : 
+
+
+-   Opérateurs arithmétiques
+
+```{r arithmetique}
+
+#| eval: false 
+
+a <- 10
+b <- 5
+
+addition <- a + b  # Addition
+soustraction <- a - b  # Soustraction
+multiplication <- a * b  # Multiplication
+division <- a / b  # Division
+modulo <- a %% b  # Modulo
+exponentiation <- a ^ b  # Exponentiation
+division_entiere <- a %/% b  # Division entière
+
+```
+
+-   Opérateurs de comparaison
+
+```{r comparaison}
+#| eval: false 
+
+x <- 10
+y <- 5
+
+egalite <- x == y  # Égalité
+difference <- x != y  # Différence
+inferieur <- x < y  # Inférieur à
+inferieur_egal <- x <= y  # Inférieur ou égal à
+superieur <- x > y  # Supérieur à
+superieur_egal <- x >= y  # Supérieur ou égal à
+
+```
+
+-   Opérateurs logiques
+
+```{r logiques}
+#| eval: false 
+
+p <- TRUE
+q <- FALSE
+
+et_logique <- p & q  # ET logique
+ou_logique <- p | q  # OU logique
+non_logique <- !p  # NON logique
+
+```
+
+-   Opérateurs d'affectation
+
+```{r affectation}
+#| eval: false 
+
+x <- 10  # Affectation simple
+y <- c(1, 2, 3)  # Affectation d'un vecteur
+
+```
+
+-   Opérateurs de concaténation
+
+```{r concatenation}
+#| eval: false 
+
+prenom <- "John"
+nom <- "Doe"
+
+concatenation <- paste(prenom, nom)  # Concaténation de chaînes de caractères
+
+```
+
+-   Opérateurs d'indexation
+
+```{r index}
+#| eval: false 
+
+vecteur <- c(1, 2, 3, 4, 5)
+matrice <- matrix(1:9, nrow = 3)
+liste <- list(1, "a", TRUE)
+
+element1 <- vecteur[2]  # Indexation d'un élément dans un vecteur
+sous_vecteur <- vecteur[2:4]  # Indexation d'un sous-vecteur
+element_matrice <- matrice[2, 3]  # Indexation d'un élément dans une matrice
+sous_matrice <- matrice[1:2, 2:3]  # Indexation d'une sous-matrice
+element_liste <- liste[[2]]  # Indexation d'un élément dans une liste
+
+```
+
+
+
