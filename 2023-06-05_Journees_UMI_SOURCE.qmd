@@ -100,7 +100,8 @@ library(tmap)
 mapme_version <- installed.packages() %>%
   data.frame() %>%
   filter(Package == "mapme.biodiversity") %>%
-  pluck("Built")
+  pluck("Built") %>%
+  ifelse(length(.) == 0, "", .)
 
 if (!("mapme.biodiversity" %in% installed.packages()) & mapme_version != "4.2.3") {
   remotes::install_github("https://github.com/mapme-initiative/mapme.biodiversity.git")
