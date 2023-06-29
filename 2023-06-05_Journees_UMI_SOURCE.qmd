@@ -5,13 +5,13 @@ format:
   html:
     output-file: "index"
     output-ext: "html"
+    output-dir: "docs"
     toc: true
     embed-resources: true
 editor: visual
 execute:
   warning: false
   error: false
-  eval: false
 editor_options: 
   chunk_output_type: console
 ---
@@ -52,22 +52,17 @@ C- Raccourcis clavier(image)
 
 D- Fonctions qui vont être régulièrement utilées
 
-select () 
-mutate () 
-filter () 
-summarise()
+select () mutate () filter () summarise()
 
 E- Opérateurs
 
 R Studio est un environnement de développement intégré (IDE) spécialement conçu pour le langage de programmation R.
 
-Lorsque vous travaillez dans R Studio, vous pouvez utiliser différents types d'opérateurs pour effectuer des opérations mathématiques, logiques et de manipulation de données. Les exemples des opérateurs les plus courants sont développés dans la partie "pour aller plus loin". 
+Lorsque vous travaillez dans R Studio, vous pouvez utiliser différents types d'opérateurs pour effectuer des opérations mathématiques, logiques et de manipulation de données. Les exemples des opérateurs les plus courants sont développés dans la partie "pour aller plus loin".
 
 ## 3. INSTALLATION ET CHARGEMENT DES LIBRAIRIES R
 
 ```{r install_librairies}
-#| eval: true
-
 # INSTALLATION DES LIBRAIRIES R 
 
 librairies_req <- c("tidyverse",# Une série de packages pour faciliter la manipulation de données
@@ -75,7 +70,6 @@ librairies_req <- c("tidyverse",# Une série de packages pour faciliter la manip
                     "writexl",# Pour écrire des fichiers excel 
                     "gt",# Pour produire de jolis tableaux
                     "sf", # Pour faciliter la manipulation de données géographiques
-                    "maptiles", # Pour télécharger des fonds de carte 
                     "geodata", # Pour télécharger simplement les frontières administratives
                     "tmap",# Pour produire de jolies cartes 
                     "wdpar", # Pour télécharger la base d'aires protégées WDPA
@@ -104,10 +98,11 @@ mapme_version <- installed.packages() %>%
   ifelse(length(.) == 0, "", .)
 
 if (!("mapme.biodiversity" %in% installed.packages()) & mapme_version != "4.2.3") {
-  remotes::install_github("https://github.com/mapme-initiative/mapme.biodiversity.git")
-}
-library(mapme.biodiversity)
+  remotes::install_github(
+    "https://github.com/mapme-initiative/mapme.biodiversity.git")
+  }
 
+library(mapme.biodiversity)
 ```
 
 ## 4. CHARGEMENT DES DONNÉES SUR LES AIRES PROTÉGÉES
@@ -121,8 +116,6 @@ La base de données WDPA constitue une source d'information complète sur les ai
 Elle rassemble des données sur les limites géographiques, les statuts juridiques, les catégories de gestion, la taille, la biodiversité, les écosystèmes et d'autres caractéristiques des aires protégées.
 
 ```{r import_wdpa}
-
-#| eval: true
 # TÉLÉCHARGEMENT DES DONNÉES DU WDPA AVEC LE PACKAGE WDPAR
 
 # On commence par importer les données libres d'accès, on les enregistre sur 
@@ -141,20 +134,19 @@ if (!file.exists("data/WDPA/WDPA_Jun2023_SEN-shapefile.zip")) {
 ## 5. CHARGEMENT DES CONTOURS ADMINISTRATIFS
 
 ```{r import_contour_sen}
-#| eval: true
 # TÉLÉCHARGEMENT DES CONTOURS ADMINISTRATIFS AVEC LE PACKAGE GEODATA
 
 # On commence par importer les données libre d'accès, on les enregistre sur 
 # le disque local et on les convertit au format standardisé sf 
 
-if (!file.exists("data/GADM/contour_sen.rds")) {
+if (!file.exists("data/GADM/gadm41_SEN_0_pk.rds")) {
 contour_sen <- gadm(country = "Senegal", resolution = 1, level = 0, 
                      path = "data/GADM") %>%  
   st_as_sf() 
   
 } else {
   # Enregistrement serveur local 
-  contour_sen <- read_rds("data/GADM/contour_sen.rds")
+  contour_sen <- read_rds("data/GADM/gadm41_SEN_0_pk.rds")
 }
 
 ```
@@ -168,7 +160,6 @@ On charge de l'information géographique, il est important de connaître les car
 Quels types de géométrie ? Quel système de projection ?
 
 ```{r geometrie}
-#| eval: true
 # CONNAÎTRE LES GÉOMÉTRIES DE LA COUCHE (POINTS, LIGNES, POLYGONES) 
 
 # On crée une colonne pour connaître la géométrie de chaque observation (mutate) 
@@ -178,14 +169,14 @@ Quels types de géométrie ? Quel système de projection ?
 WDPA_Senegal %>%
   mutate(geom_type = st_geometry_type(.)) %>%  
   group_by(geom_type) %>%  
-  summarise(n = n()) 
+  summarise(n = n())  %>%
+  st_drop_geometry() %>%
+  gt() # Cette fonction sert à produire un affichage "propre
 
 # CONNAÎTRE LE SYSTÈME DE PROJECTION 
+st_crs(WDPA_Senegal)
 
-crs(WDPA_Senegal)
-crs(contour_sen)
-
-crs(contour_sen) == crs(WDPA_Senegal)
+st_crs(contour_sen) == st_crs(WDPA_Senegal)
 
 ```
 
@@ -198,7 +189,6 @@ Pour rappel, la fonction gt() sert à produire de jolis tableaux. Elle arrive en
 La fonction pivot_long() doit être exécutée avant d'utiliser gt() car le package traite la donnée en format "long" et non en format "large" comme c'est le cas pour le moment dans l'objet WDPA Senegal.
 
 ```{r donnees_manquantes}
-#| eval: true
 # CRÉER UN TABLEAU SYNTHÉTIQUE POUR AVOIR UNE VUE GLOBALE DES DONNÉES MANQUANTES
 
 # On supprime tout d'abord la colonne des géométries pour faciliter le traitement
@@ -230,7 +220,6 @@ La table attributaire du WDPA est suffisamment renseignée pour pouvoir produire
 Carte 1. Les différentes catégories d'aires protégées au Sénégal d'après les données satellitaires du WDPA ;
 
 ```{r carte_aires_prot}
-#| eval: true
 # PRODUCTION DE CARTES THÉMATIQUES ET ESTHÉTIQUES AVEC LE PACKAGE TMAP
 
 tmap_mode(mode = "view") 
@@ -261,7 +250,7 @@ Il permet l'**importation d'un nombre important de base de données et le calcul
 Pour l'analyse des données géographiques, le package utilise sf pour l'exploitation des données vectorielles et terra pour les données rasters.
 
 ```{r}
-#| eval: true
+
 help(package = "mapme.biodiversity")
 
 ```
@@ -273,48 +262,28 @@ Ces indicateurs permettent aux usagers d'analyser des dynamiques spatiales et te
 Pour connaître les ressources et les indicateurs associés disponibles :
 
 ```{r dispo_indicateurs}
-#| eval: true
-available_resources()
 
-available_indicators()
+names(available_indicators())
 
 # LISTE DES INDICATEURS DISPONIBLES
-
 # active_fire_counts: Calculate active fire counts based on NASA FIRMS
-#
 #polygonsactive_fire_properties: Calculate active fire properties based on 
 #NASA FIRMS polygons
-# 
 # biome: Calculate biomes statistics (TEOW) based on WWF
-# 
 # drought_indicator: Calculate drought indicator statistics
-# 
 # ecoregion: Calculate terrestrial ecoregions statistics (TEOW) based on WWF
-# 
 # landcover: Calculate area of different landcover classes
-# 
 # mangroves_area: Calculate mangrove extent based on Global Mangrove Watch (GMW)
-# 
 # population_count: Calculate population count statistics (Worldpop)
-# 
 # precipitation_chirps: Calculate precipitation statistics based on CHIRPS
-# 
 # precipitation_wc: Calculate precipitation statistics
-# 
 # soilproperties: Calculate Zonal Soil Properties
-# 
 # temperature_max_wc: Calculate maximum temperature statistics
-# 
 # temperature_min_wc: Calculate minimum temperature statistics based on WorldClim
-# 
 # traveltime: Calculate accessibility statistics
-# 
 # treecover_area: Calculate treecover statistics
-# 
 # treecover_area_and_emissions: Calculate treeloss statistics
-# 
 # treecoverloss_emissions: Calculate emission statistics
-# 
 # tri: Calculate Terrain Ruggedness Index (TRI) statistics
 
 ```
@@ -323,7 +292,7 @@ A la lecture de la liste, l'utilisateur choisit quels sont les indicateurs qui l
 
 Plus de détails sur les indicateurs (source, unité, limites) sont consultables sur le site : https://mapme-initiative.github.io/mapme.biodiversity/reference/index.html
 
-# Constitution d'un porte-feuille
+# Constitution d'un portefeuille
 
 Une fois le choix de ressources et d'indicateurs effectué, il faut d'abord *initier un portefeuille de la biodiversité*. Ce principe de création de porte-feuille est un traitement spécifique qu'on applique à un objet spatial sf.
 
@@ -338,7 +307,7 @@ En créant le portefeuille, certaines vérifications préliminaires seront autom
 Certains paramètres globaux du portefeuille, tels que le répertoire de sortie pour les ensembles de données téléchargés, un répertoire temporaire pour les calculs intermédiaires, peuvent être définis par l'utilisateur pour avoir un contrôle plus précis du flux de travail. Cependant, ces paramètres sont également définis sur des valeurs par défaut sensibles et peuvent donc être omis lors de l'initialisation du portefeuille.
 
 ```{r portefeuille}
-#| eval: true
+
 # EXÉCUTION DE LA FONCTION INIT_PORTFOLIO 
 
 # Avant de créer le porte-feuille, on filtre notre couche WDPA 
@@ -366,7 +335,7 @@ Une fois le porte-feuille lancé, on peut récupérer les données de notre int�
 1- Le couvert forestier avec Global Forest Watch (GFW)
 
 ```{r deforestation}
-#| eval: true
+
 # Données de Global Forest Watch (GFW) sur le couvert forestier
 
 WDPA_mapme <- get_resources(x = WDPA_mapme, 
@@ -391,7 +360,7 @@ if (file.exists("WDPA_mapme_foret.rds")) {
 2- La surface de mangroves avec Global Mangrove Watch (GMW)
 
 ```{r mangrove}
-#| eval: true
+
 # Données de Global Mangrove Watch (GMW) sur la surface de mangroves 
 
 WDPA_mapme <- get_resources(x = WDPA_mapme,resources = "gmw")
@@ -429,7 +398,7 @@ On doit aussi se rappeler que les aires protégées sont parfois composées de p
 Nous appelerons ce tableau WDPA_terrain :
 
 ```{r desimbrication}
-#| eval: true
+
 # DÉSIMBRICATION DES LISTES D'INDICATEURS 
 
 # On déplie les données des colonnes importées 
@@ -447,7 +416,7 @@ On obtient alors un tableau avec un nombre d'observations important pour un mêm
 Nous faisons le choix de ne garder que certaines variables. Ce choix dépend directement de l'analyse statistique que nous voulons faire derrière.
 
 ```{r tableau_stats}
-#| eval: true
+
 # SÉLECTION DES VARIABLES PERTINENTES 
 
 WDPA_stats <- WDPA_terrain %>% 
@@ -467,12 +436,9 @@ WDPA_stats <- WDPA_terrain %>%
 
 Maintenant, il est possible d'explorer ces résultats en vue de les exploiter.
 
-Nous pouvons commencer avec une analyse globale où nous cherchons par exemple à connaître l'état 
-des indicateurs sur une année précise. Quelle est la surface moyenne de forêt et de mangrove en 2020 au sein de chaque aire protégée ? 
+Nous pouvons commencer avec une analyse globale où nous cherchons par exemple à connaître l'état des indicateurs sur une année précise. Quelle est la surface moyenne de forêt et de mangrove en 2020 au sein de chaque aire protégée ?
 
 ```{r indicateurs_2020}
-#| eval: true
-
 # RÉSULTATS SUR UNE ANNÉE (2020)
 
 # On filtre d'abord les résultats à l'aide des opérateurs pour ne garder 
@@ -493,7 +459,6 @@ WDPA_moyenne_2020 <- WDPA_stats %>%
 Nous pouvons aussi filter nos recherches sur une aire protégée. L'idéal serait d'avoir une aire protégée où il y a de la forêt et de la mangrove. Au lieu d'appliquer ces conditions sur l'ensemble du jeu de données, afin de gagner du temps, on choisit de se focaliser sur 2019.
 
 ```{r liste_foret_mangrove}
-#| eval: true
 
 # RECHERCHE D'AIRE PROTÉGÉE CONTENANT DE LA MANGROVE ET DE LA FORÊT
 
@@ -510,7 +475,7 @@ Maintenant qu'on a obtenu la liste des aires protégées ayant de la forêt et d
 Exemple de la Basse-Casamance :
 
 ```{r basse_casamance}
-#| eval: true
+
 # ÉTAT DES INDICATEURS EN BASSE CASAMANCE 
 
 WDPA_Casamance <-  WDPA_stats %>% 
@@ -523,7 +488,7 @@ On remarque alors que la *superficie des aires protégées est en km²* alors qu
 Cet exemple confirme **l'importance de lire la documentation** avant d'utiliser des données.
 
 ```{r ap_nouvelle_surface}
-#| eval: true
+
 # CRÉATION D'UNE COLONNE SURFACE EN HA
 
 WDPA_stats <- WDPA_stats %>%
@@ -532,7 +497,6 @@ WDPA_stats <- WDPA_stats %>%
 
 ```
 
-
 # PRODUCTION D'UNE CARTE THÉMATIQUE SUR LE COUVERT FORESTIER PAR AIRE PROTÉGÉE
 
 Nous souhaiterions maintenant créer une carte comme cela a déjà été fait précédemment pour mettre en avant la variable de notre choix dans les aires protégées.
@@ -540,7 +504,7 @@ Nous souhaiterions maintenant créer une carte comme cela a déjà été fait pr
 Si nous commençons avec le couvert forestier, il faut d'abord créer un nouvel objet *WDPA_foret* qui synthétise les valeurs par année et par aire protégée.
 
 ```{r carte_foret_2019}
-#| eval: true
+
 # CARTE COUVERT FORESTIER 2020 (VOIR POUR RENOMMER COUVERT_FORET)
 
 # On filtre les données que l'on veut présenter sur la carte, à savoir l'année
@@ -567,7 +531,7 @@ tm_polygons(col = "Couvert_foret", alpha = 0.6, title = "Couvert forestier
 Exemple avec de la mangrove :
 
 ```{r carte_mangrove_2019}
-#| eval: true
+
 # CARTE SURFACE LE MANGROVE DES AIRES PROTEGEES EN 2020 
 
 WDPA_mangrove_2020 <- WDPA_stats %>% 
@@ -580,7 +544,7 @@ tm_polygons(col = "Mangrove_surface", alpha = 0.6, title = "Surface de mangrove
             des aires protégées en 2020 au Sénégal",
             palette = "Greens",
             id = "Nom",
-            legend.format = list(big.mark = ""),
+            legend.format = list(big.mark = " "),
             popup.vars = c("Catégorie" = "Categorie",
                              "Surface déclarée" = "Surface_ha",
                              "Année de création" = "Annee_creation")) 
@@ -588,10 +552,9 @@ tm_polygons(col = "Mangrove_surface", alpha = 0.6, title = "Surface de mangrove
 
 ```
 
+## 10. POUR ALLER PLUS LOIN :
 
-## 10. POUR ALLER PLUS LOIN : 
-
-Exemple d'intentation : 
+Exemple d'intentation :
 
 ```{r identation}
 #| eval: false 
@@ -624,8 +587,7 @@ if (a>0){
 
 ```
 
-Exemple d'opérateurs : 
-
+Exemple d'opérateurs :
 
 -   Opérateurs arithmétiques
 
@@ -715,6 +677,3 @@ sous_matrice <- matrice[1:2, 2:3]  # Indexation d'une sous-matrice
 element_liste <- liste[[2]]  # Indexation d'un élément dans une liste
 
 ```
-
-
-
