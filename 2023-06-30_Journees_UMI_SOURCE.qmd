@@ -115,6 +115,7 @@ if (!("mapme.biodiversity" %in% installed.packages()) & mapme_version != "4.2.3"
   }
 
 library(mapme.biodiversity)
+
 ```
 
 ## Chargement des données sur les aires protégées
@@ -186,6 +187,7 @@ WDPA_Senegal %>%
   gt() # Cette fonction sert à produire un affichage "propre
 
 # CONNAÎTRE LE SYSTÈME DE PROJECTION 
+
 st_crs(WDPA_Senegal)
 
 st_crs(contour_sen) == st_crs(WDPA_Senegal)
@@ -278,9 +280,9 @@ Pour connaître les ressources et les indicateurs associés disponibles :
 names(available_indicators())
 
 # LISTE DES INDICATEURS DISPONIBLES
+
 # active_fire_counts: Calculate active fire counts based on NASA FIRMS
-#polygonsactive_fire_properties: Calculate active fire properties based on 
-#NASA FIRMS polygons
+#active_fire_properties: Calculate active fire properties based on NASA FIRMS polygons
 # biome: Calculate biomes statistics (TEOW) based on WWF
 # drought_indicator: Calculate drought indicator statistics
 # ecoregion: Calculate terrestrial ecoregions statistics (TEOW) based on WWF
@@ -451,6 +453,7 @@ Maintenant, il est possible d'explorer ces résultats en vue de les exploiter.
 Nous pouvons commencer avec une analyse globale où nous cherchons par exemple à connaître l'état des indicateurs sur une année précise. Quelle est la surface moyenne de forêt et de mangrove en 2020 au sein de chaque aire protégée ?
 
 ```{r indicateurs_2020}
+
 # RÉSULTATS SUR UNE ANNÉE (2020)
 
 # On filtre d'abord les résultats à l'aide des opérateurs pour ne garder 
@@ -563,6 +566,37 @@ tm_polygons(col = "Mangrove_surface", alpha = 0.6, title = "Surface de mangrove
 
 
 ```
+
+Tableau : série temporelle de la mangrove en Basse Casamance
+
+```{r}
+
+WDPA_BC_evolution <- WDPA_Casamance %>%
+  mutate(Surface_ha = Surface * 100) %>%
+  select(Mangrove_surface, Annees_mangrove, Surface_ha, Categorie, Annee_creation) %>% 
+  distinct() 
+
+
+```
+
+Carte : évolution de la mangrove en BC 
+
+```{r}
+
+tm_shape(contour_sen) +
+tm_borders() + 
+tm_shape(WDPA_BC_evolution) + 
+tm_polygons(col = "Mangrove_surface", group = "Annees_mangrove", alpha = 0.6, title = "Evolution de la surface de mangrove en Basse-Casamance de 2007 à 2020",
+            palette = "Greens",
+            id = "Nom",
+            legend.format = list(big.mark = " "),
+            popup.vars = c("Catégorie" = "Categorie",
+                             "Surface déclarée" = "Surface_ha",
+                             "Année de création" = "Annee_creation")) 
+
+```
+
+Piste : utilisation de rasters ? 
 
 ## Pour aller plus loin
 
