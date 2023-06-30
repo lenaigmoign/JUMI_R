@@ -1,6 +1,6 @@
 ---
 title: "Journées de l'UMI SOURCE "
-author: "Lenaïg MOIGN, Florent Bédécarrats"
+author: "Lenaïg Moign, Florent Bédécarrats"
 format:
   html:
     output-file: "index"
