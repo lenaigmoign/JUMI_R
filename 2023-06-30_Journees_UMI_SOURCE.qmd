@@ -8,6 +8,7 @@ format:
     output-dir: "docs"
     toc: true
     embed-resources: true
+    number-sections: true
 editor: visual
 execute:
   warning: false
@@ -16,7 +17,7 @@ editor_options:
   chunk_output_type: console
 ---
 
-## 1. Objectifs de la formation
+## Objectifs de la formation
 
 Faire des analyses spatiales avec R et notamment :
 
@@ -24,7 +25,7 @@ Faire des analyses spatiales avec R et notamment :
 
 2)  Croiser ces données spatiales avec des données environnementales, sous la forme d'indicateurs, provenant également d'open data (package mapme.biodiversity)
 
-## 2. Fonctionnement de RStudio
+## Fonctionnement de RStudio
 
 A - Interface console
 
@@ -60,7 +61,7 @@ R Studio est un environnement de développement intégré (IDE) spécialement co
 
 Lorsque vous travaillez dans R Studio, vous pouvez utiliser différents types d'opérateurs pour effectuer des opérations mathématiques, logiques et de manipulation de données. Les exemples des opérateurs les plus courants sont développés dans la partie "pour aller plus loin".
 
-## 3. Installation et chargement des librairies R
+## Installation et chargement des librairies R
 
 ```{r install_librairies}
 # INSTALLATION DES LIBRAIRIES R 
@@ -105,7 +106,7 @@ if (!("mapme.biodiversity" %in% installed.packages()) & mapme_version != "4.2.3"
 library(mapme.biodiversity)
 ```
 
-## 4. Chargement des données sur les aires protégées
+## Chargement des données sur les aires protégées
 
 L'initiative WDPA (World Database on Protected Areas) est un projet international visant à recueillir, à gérer et à diffuser des informations sur les aires protégées à travers le monde.
 
@@ -131,7 +132,7 @@ if (!file.exists("data/WDPA/WDPA_Jun2023_SEN-shapefile.zip")) {
 
 ```
 
-## 5. Chargement des contours administratifs
+## Chargement des contours administratifs
 
 ```{r import_contour_sen}
 # TÉLÉCHARGEMENT DES CONTOURS ADMINISTRATIFS AVEC LE PACKAGE GEODATA
@@ -151,7 +152,7 @@ contour_sen <- gadm(country = "Senegal", resolution = 1, level = 0,
 
 ```
 
-## 6. Exploration des données disponibles sur les aires protégées 
+## Exploration des données disponibles sur les aires protégées 
 
 ### Caractéristiques spatiales
 
@@ -213,7 +214,7 @@ WDPA_Senegal %>%
 
 ```
 
-### 7. Produire des cartes synthétiques sur les aires protégées 
+## Produire des cartes synthétiques sur les aires protégées 
 
 La table attributaire du WDPA est suffisamment renseignée pour pouvoir produire des cartes thématiques pour mettre en avant une variable de notre jeu de données.
 
@@ -239,7 +240,7 @@ tmap_options(check.and.fix = TRUE)
 
 ```
 
-### 8. Acquisition de données environnementales et calcul d'indicateurs
+## Acquisition de données environnementales et calcul d'indicateurs
 
 ### Le package mapme.biodiversity
 
@@ -385,7 +386,7 @@ save(WDPA_mapme, file = "data/WDPA_indicators.rds")
 
 ```
 
-## 7. Tri des données pour faciliter l'exploration
+## Tri des données pour faciliter l'exploration
 
 ### Désimbrication des indicateurs
 
@@ -432,7 +433,7 @@ WDPA_stats <- WDPA_terrain %>%
 
 ```
 
-## 9. Exploration des indicateurs environnemtaux sur les aires protégées
+## Exploration des indicateurs environnemtaux sur les aires protégées
 
 Maintenant, il est possible d'explorer ces résultats en vue de les exploiter.
 
@@ -552,7 +553,7 @@ tm_polygons(col = "Mangrove_surface", alpha = 0.6, title = "Surface de mangrove
 
 ```
 
-## 10. Pour aller plus loin
+## Pour aller plus loin
 
 Exemple d'intentation :
 
