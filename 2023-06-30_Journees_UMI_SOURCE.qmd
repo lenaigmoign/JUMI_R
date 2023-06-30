@@ -7,9 +7,9 @@ format:
     output-ext: "html"
     output-dir: "docs"
     toc: true
+    toc-depth: 3
     embed-resources: true
     number-sections: true
-    number-depth: 3
 editor: visual
 execute:
   warning: false
@@ -296,7 +296,7 @@ Plus de détails sur les indicateurs (source, unité, limites) sont consultables
 
 ### Constitution d'un portefeuille
 
-Une fois le choix de ressources et d'indicateurs effectué, il faut d'abord *initier un portefeuille de la biodiversité*. Ce principe de création de porte-feuille est un traitement spécifique qu'on applique à un objet spatial sf.
+Une fois le choix de ressources et d'indicateurs effectué, il faut d'abord *initier un portefeuille de la biodiversité*. Ce principe de création de portefeuille est un traitement spécifique qu'on applique à un objet spatial sf.
 
 -   NB : Dans notre cas, pour faciliter le traitement, on va d'abord subdiviser notre objet sf() en géométries de type "polygone" avant d'appliquer la fonction init_portfolio(). L'idée est d'avoir des indicateurs pour chaque partie de l'aire protégée. Il suffira ensuite de fusionner ces polygones pour avoir des résultats globaux pour les aires protégées composées de plusieurs polygones .\*
 
@@ -312,7 +312,7 @@ Certains paramètres globaux du portefeuille, tels que le répertoire de sortie 
 
 # EXÉCUTION DE LA FONCTION INIT_PORTFOLIO 
 
-# Avant de créer le porte-feuille, on filtre notre couche WDPA 
+# Avant de créer le portefeuille, on filtre notre couche WDPA 
 # L'idée est de ne garder que les données  pertinentes (années renseignées, 
 # et géométries de type polygone ou multi-polygone)
 # Certaines aires protégées sont composées de plusieurs polygones disjoints  
@@ -332,7 +332,7 @@ WDPA_mapme <- init_portfolio(x = WDPA_mapme,
 
 ```
 
-Une fois le porte-feuille lancé, on peut récupérer les données de notre intérêt en ligne puis lancer le calcul d'indicateurs pour chaque observation de notre objet sf. Cela peut prendre un peu de temps en fonction du volume de données importées.
+Une fois le portefeuille lancé, on peut récupérer les données de notre intérêt en ligne puis lancer le calcul d'indicateurs pour chaque observation de notre objet sf. Cela peut prendre un peu de temps en fonction du volume de données importées.
 
 ### Acquisition des données de couvert forestier avec Global Forest Watch (GFW)
 
