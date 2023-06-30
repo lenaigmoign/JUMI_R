@@ -28,11 +28,19 @@ Faire des analyses spatiales avec R et notamment :
 
 ## Fonctionnement de RStudio
 
-A - Interface console
+### Interface
 
-A : Fenêtre d'édition des fichiers source "script" B : Console C : Fenêtre environnement D : Fenêtre multi-onglets
+Elle comporte quatre fenêtres
 
-B - Règles de code
+A)  **Source** : pour éditer les fichiers scripts (R et autres langages)
+
+B)  **Console** : où s'exécute le code et où on peut directement taper des commandes
+
+C)  **Environnement** : qui rassemble des fonctionnalités pour suivre le fonctionnement de R
+
+D)  **Explorateur** : vue sur les fichiers, libraries et rendus
+
+### Règles de code
 
 Lorsque vous travaillez sur RStudio, il est recommandé de suivre certaines règles de code pour maintenir un code clair, lisible et cohérent.
 
@@ -48,21 +56,23 @@ Voici quelques règles générales à prendre en compte :
 
 -   Utilisation de parenthèses : Utilisez des parenthèses pour regrouper les expressions complexes et améliorer la lisibilité.Cela aide également à éviter toute ambiguïté dans les opérations.
 
--   Indentation : utilisez une indentation cohérente pour améliorer la lisibilité de votre code. Généralement, l'indentation est de deux espaces ou de quatre espaces, mais l'important est de choisir une convention et de s'y tenir tout au long du code. Des exemples sont fournis à la fin du notebook, dans la partie "pour aller plus loin".
+-   Indentation : utilisez une indentation cohérente pour améliorer la lisibilité de votre code. Généralement, l'indentation est de deux espaces ou de quatre espaces, mais l'important est de choisir une convention et de s'y tenir tout au long du code. Des exemples sont fournis à la fin du notebook, dans la partie "pour aller plus loin". Le raccourci CTRL + I applique automatiquement l'indentation standard au texte sélectionné.
 
-C- Raccourcis clavier(image)
+### Raccourcis clavier(image)
 
-D- Fonctions qui vont être régulièrement utilées
+### Fonctions qui vont être régulièrement utilées
 
 select () mutate () filter () summarise()
 
-E- Opérateurs
+### Opérateurs
 
 R Studio est un environnement de développement intégré (IDE) spécialement conçu pour le langage de programmation R.
 
 Lorsque vous travaillez dans R Studio, vous pouvez utiliser différents types d'opérateurs pour effectuer des opérations mathématiques, logiques et de manipulation de données. Les exemples des opérateurs les plus courants sont développés dans la partie "pour aller plus loin".
 
 ## Installation et chargement des librairies R
+
+Le moyen le plus simple d'installer une librairie est d'utiliser le menu "packages" dans le panneau d'exploration (en bas à droite).
 
 ```{r install_librairies}
 # INSTALLATION DES LIBRAIRIES R 
@@ -153,7 +163,7 @@ contour_sen <- gadm(country = "Senegal", resolution = 1, level = 0,
 
 ```
 
-## Exploration des données disponibles sur les aires protégées 
+## Exploration des données disponibles sur les aires protégées
 
 ### Caractéristiques spatiales
 
@@ -215,7 +225,7 @@ WDPA_Senegal %>%
 
 ```
 
-## Produire des cartes synthétiques sur les aires protégées 
+## Produire des cartes synthétiques sur les aires protégées
 
 La table attributaire du WDPA est suffisamment renseignée pour pouvoir produire des cartes thématiques pour mettre en avant une variable de notre jeu de données.
 
@@ -298,7 +308,7 @@ Plus de détails sur les indicateurs (source, unité, limites) sont consultables
 
 Une fois le choix de ressources et d'indicateurs effectué, il faut d'abord *initier un portefeuille de la biodiversité*. Ce principe de création de portefeuille est un traitement spécifique qu'on applique à un objet spatial sf.
 
--   NB : Dans notre cas, pour faciliter le traitement, on va d'abord subdiviser notre objet sf() en géométries de type "polygone" avant d'appliquer la fonction init_portfolio(). L'idée est d'avoir des indicateurs pour chaque partie de l'aire protégée. Il suffira ensuite de fusionner ces polygones pour avoir des résultats globaux pour les aires protégées composées de plusieurs polygones .\*
+-   NB : Dans notre cas, pour faciliter le traitement, on va d'abord subdiviser notre objet `sf` en géométries de type "polygone" avant d'appliquer la fonction `init_portfolio()`. L'idée est d'avoir des indicateurs pour chaque partie de l'aire protégée. Il suffira ensuite de fusionner ces polygones pour avoir des résultats globaux pour les aires protégées composées de plusieurs polygones .\*
 
 Chaque ligne de l'objet est alors considérée comme un **actif unique dans le portefeuille** pour lequel des indicateurs environnementaux seront calculés plus loin dans la chaîne de traitement. C'est-à-dire que le portefeuille produit des colonnes imbriquées pour chaque observation, car dans bien des cas, on peut avoir plusieurs valeurs (par année) pour une même observation, voire plusieurs variables.
 
