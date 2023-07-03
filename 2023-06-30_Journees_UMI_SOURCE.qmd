@@ -22,21 +22,20 @@ editor_options:
 
 Faire des analyses spatiales avec R et notamment :
 
-1. Prendre conscience du potentiel des données en open data
-2. Comprendre la manière dont sont structurées les données spatio-temporelles
-3. Entretenir un recul critique sur les données
-4. Comprendre dans quels cas l'utilisation de R est opportune
-5. Se familiariser avec la logique et les méthodes de traitement sous R
-6. Identifier comment approfondir sa maîtrise si opportun
+1.  Prendre conscience du potentiel des données en open data
+2.  Comprendre la manière dont sont structurées les données spatio-temporelles
+3.  Entretenir un recul critique sur les données
+4.  Comprendre dans quels cas l'utilisation de R est opportune
+5.  Se familiariser avec la logique et les méthodes de traitement sous R
+6.  Identifier comment approfondir sa maîtrise si opportun
 
-
-> **Discussion** : Avez-vous une expérience avec R ? Partagez-vous ces objectifs ? Quels sont vos commentaires à leur égard ? 
+> **Discussion** : Avez-vous une expérience avec R ? Partagez-vous ces objectifs ? Quels sont vos commentaires à leur égard ?
 
 ## Fonctionnement de RStudio
 
-Nous allons maintenant lancer et prendre en main le logiciel. 
+Nous allons maintenant lancer et prendre en main le logiciel.
 
-Vous avez téléchargé votre fichier zippé "data". Dézipper le dans un dossier de travail. Ouvrez R studio. Allez dans "file/new project/existing directory" et vous sélectionnez le dossier contenant votre dossier data. 
+Vous avez téléchargé votre fichier zippé "data". Dézipper le dans un dossier de travail. Ouvrez R studio. Allez dans "file/new project/existing directory" et vous sélectionnez le dossier contenant votre dossier data.
 
 ### Interface
 
@@ -44,12 +43,9 @@ Elle comporte quatre fenêtres :
 
 ![Fenêtre de l'interface utilisateur R studio (Source : ourednik.info)](Figures/R_interface_colored.png)
 
-A)  **Source** : pour éditer les fichiers scripts (R et autres langages)
-
-B)  **Console** : où s'exécute le code et où on peut directement taper des commandes
-
-C)  **Environnement** : qui rassemble des fonctionnalités pour suivre le fonctionnement de R
-
+A)  **Source** : pour éditer les fichiers scripts (R et autres langages)\
+B)  **Console** : où s'exécute le code et où on peut directement taper des commandes\
+C)  **Environnement** : qui rassemble des fonctionnalités pour suivre le fonctionnement de R\
 D)  **Explorateur** : vue sur les fichiers, libraries et rendus
 
 ### Règles de code
@@ -58,17 +54,17 @@ Lorsque vous travaillez sur RStudio, il est recommandé de suivre certaines règ
 
 Voici quelques règles générales à prendre en compte :
 
-- Objets 
+-   Objets
 
-- Assignation 
+-   Assignation
 
-- Opérations
+-   Opérations
 
-- Opérateur pipe 
+-   Opérateur pipe
 
-- Résultats
+-   Résultats
 
-- Documents 
+-   Documents
 
 Dans quels cas on utilise R ? Discussion
 
@@ -82,7 +78,7 @@ Il existe différents raccourcis clavier pour faciliter la mise en forme et l'ex
 
 R Studio est un environnement de développement intégré (IDE) spécialement conçu pour le langage de programmation R.
 
-Lorsque vous travaillez dans R Studio, vous pouvez utiliser différents types d'opérateurs pour effectuer des opérations mathématiques, logiques et de manipulation de données. 
+Lorsque vous travaillez dans R Studio, vous pouvez utiliser différents types d'opérateurs pour effectuer des opérations mathématiques, logiques et de manipulation de données.
 
 Si vous souhaitez explorer les fonctionnalités de R :
 
@@ -587,6 +583,20 @@ WDPA_stats <- WDPA_terrain %>%
          Annee_creation = STATUS_YR) 
 
 ```
+
+## Carte des mangroves
+
+```{r}
+ap_saloum <- WDPA_Senegal %>%
+  filter(NAME == "Delta du Saloum" & DESIG == "Parc National")
+
+mangrove_saloum <-  sf_read("data/gmw/")
+
+
+
+```
+
+
 
 ## Exploration des indicateurs environnemtaux sur les aires protégées
 
