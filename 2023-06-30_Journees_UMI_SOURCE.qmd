@@ -1,5 +1,5 @@
 ---
-title: "Journées de l'UMI SOURCE "
+title: "Analyses spatiales avec R et mapme.biodiversity : application aux mangroves et forêts protégées sénégalaises"
 author: "Lenaïg Moign, Florent Bédécarrats"
 format:
   html:
@@ -22,15 +22,27 @@ editor_options:
 
 Faire des analyses spatiales avec R et notamment :
 
-1)  Travailler avec des données géospatiales open source (base des données sur les aires protégées WPDA)
+1. Prendre conscience du potentiel des données en open data
+2. Comprendre la manière dont sont structurées les données spatio-temporelles
+3. Entretenir un recul critique sur les données
+4. Comprendre dans quels cas l'utilisation de R est opportune
+5. Se familiariser avec la logique et les méthodes de traitement sous R
+6. Identifier comment approfondir sa maîtrise si opportun
 
-2)  Croiser ces données spatiales avec des données environnementales, sous la forme d'indicateurs, provenant également d'open data (package mapme.biodiversity)
+
+> **Discussion** : Avez-vous une expérience avec R ? Partagez-vous ces objectifs ? Quels sont vos commentaires à leur égard ? 
 
 ## Fonctionnement de RStudio
 
+Nous allons maintenant lancer et prendre en main le logiciel. 
+
+Vous avez téléchargé votre fichier zippé "data". Dézipper le dans un dossier de travail. Ouvrez R studio. Allez dans "file/new project/existing directory" et vous sélectionnez le dossier contenant votre dossier data. 
+
 ### Interface
 
-Elle comporte quatre fenêtres
+Elle comporte quatre fenêtres :
+
+![Fenêtre de l'interface utilisateur R studio (Source : ourednik.info)](Figures/R_interface_colored.png)
 
 A)  **Source** : pour éditer les fichiers scripts (R et autres langages)
 
@@ -46,29 +58,159 @@ Lorsque vous travaillez sur RStudio, il est recommandé de suivre certaines règ
 
 Voici quelques règles générales à prendre en compte :
 
--   Nom des variables : Utilisez des noms de variables descriptifs et significatifs pour améliorer la compréhension du code. Évitez les noms de variables trop courts ou cryptiques. Utilisez des noms en minuscules avec des mots séparés par des underscores pour une meilleure lisibilité.
+- Objets 
 
--   Commentaires : Utilisez des commentaires pour expliquer des parties complexes du code, des décisions importantes ou pour fournir des informations supplémentaires. Les commentaires aident à comprendre le code plus facilement, en particulier pour les autres personnes qui pourraient lire votre code ultérieurement.
+- Assignation 
 
--   Espacement : Utilisez des espaces pour améliorer la lisibilité. Par exemple, utilisez des espaces autour des opérateurs (comme +, -, \*, /) pour distinguer clairement les éléments.
+- Opérations
 
--   Limitation de la longueur des lignes : Essayez de limiter la longueur de chaque ligne de code à environ 80 caractères.Si une ligne est trop longue, vous pouvez la diviser en plusieurs lignes en utilisant des indentations appropriées.
+- Opérateur pipe 
 
--   Utilisation de parenthèses : Utilisez des parenthèses pour regrouper les expressions complexes et améliorer la lisibilité.Cela aide également à éviter toute ambiguïté dans les opérations.
+- Résultats
 
--   Indentation : utilisez une indentation cohérente pour améliorer la lisibilité de votre code. Généralement, l'indentation est de deux espaces ou de quatre espaces, mais l'important est de choisir une convention et de s'y tenir tout au long du code. Des exemples sont fournis à la fin du notebook, dans la partie "pour aller plus loin". Le raccourci CTRL + I applique automatiquement l'indentation standard au texte sélectionné.
+- Documents 
 
-### Raccourcis clavier(image)
+Dans quels cas on utilise R ? Discussion
 
-### Fonctions qui vont être régulièrement utilées
+### Raccourcis clavier
 
-select () mutate () filter () summarise()
+Il existe différents raccourcis clavier pour faciliter la mise en forme et l'exécution du code
+
+![Raccourcis clavier pratiques sur R studio](Figures/Raccourcis_clavier.JPG)
 
 ### Opérateurs
 
 R Studio est un environnement de développement intégré (IDE) spécialement conçu pour le langage de programmation R.
 
-Lorsque vous travaillez dans R Studio, vous pouvez utiliser différents types d'opérateurs pour effectuer des opérations mathématiques, logiques et de manipulation de données. Les exemples des opérateurs les plus courants sont développés dans la partie "pour aller plus loin".
+Lorsque vous travaillez dans R Studio, vous pouvez utiliser différents types d'opérateurs pour effectuer des opérations mathématiques, logiques et de manipulation de données. 
+
+Si vous souhaitez explorer les fonctionnalités de R :
+
+## Pour aller plus loin
+
+Exemple d'intentation :
+
+```{r identation}
+#| eval: false 
+
+# Pas bien : difficile a lire
+if (a>0){
+b <- a^2
+if (b>4){
+c <- log(b)
+}else{
+c <- exp(b)
+}
+}else{
+b <- -a^2 + 3
+c <- NULL
+}
+
+# Bien : lisible (il suffit de faire CTRL+I)
+if (a > 0) {
+  b <- a^2
+  if (b > 4) {
+    c <- log(b)
+  } else {
+    c <- exp(b)
+  }
+} else {
+  b <- -a^2 + 3
+  c <- NULL
+}
+
+```
+
+Exemple d'opérateurs :
+
+-   Opérateurs arithmétiques
+
+```{r arithmetique}
+
+#| eval: false 
+
+a <- 10
+b <- 5
+
+addition <- a + b  # Addition
+soustraction <- a - b  # Soustraction
+multiplication <- a * b  # Multiplication
+division <- a / b  # Division
+modulo <- a %% b  # Modulo
+exponentiation <- a ^ b  # Exponentiation
+division_entiere <- a %/% b  # Division entière
+
+```
+
+-   Opérateurs de comparaison
+
+```{r comparaison}
+#| eval: false 
+
+x <- 10
+y <- 5
+
+egalite <- x == y  # Égalité
+difference <- x != y  # Différence
+inferieur <- x < y  # Inférieur à
+inferieur_egal <- x <= y  # Inférieur ou égal à
+superieur <- x > y  # Supérieur à
+superieur_egal <- x >= y  # Supérieur ou égal à
+
+```
+
+-   Opérateurs logiques
+
+```{r logiques}
+#| eval: false 
+
+p <- TRUE
+q <- FALSE
+
+et_logique <- p & q  # ET logique
+ou_logique <- p | q  # OU logique
+non_logique <- !p  # NON logique
+
+```
+
+-   Opérateurs d'affectation
+
+```{r affectation}
+#| eval: false 
+
+x <- 10  # Affectation simple
+y <- c(1, 2, 3)  # Affectation d'un vecteur
+
+```
+
+-   Opérateurs de concaténation
+
+```{r concatenation}
+#| eval: false 
+
+prenom <- "John"
+nom <- "Doe"
+
+concatenation <- paste(prenom, nom)  # Concaténation de chaînes de caractères
+
+```
+
+-   Opérateurs d'indexation
+
+```{r index}
+#| eval: false 
+
+vecteur <- c(1, 2, 3, 4, 5)
+matrice <- matrix(1:9, nrow = 3)
+liste <- list(1, "a", TRUE)
+
+element1 <- vecteur[2]  # Indexation d'un élément dans un vecteur
+sous_vecteur <- vecteur[2:4]  # Indexation d'un sous-vecteur
+element_matrice <- matrice[2, 3]  # Indexation d'un élément dans une matrice
+sous_matrice <- matrice[1:2, 2:3]  # Indexation d'une sous-matrice
+element_liste <- liste[[2]]  # Indexation d'un élément dans une liste
+
+```
 
 ## Installation et chargement des librairies R
 
@@ -579,7 +721,7 @@ WDPA_BC_evolution <- WDPA_Casamance %>%
 
 ```
 
-Carte : évolution de la mangrove en BC 
+Carte : évolution de la mangrove en BC
 
 ```{r}
 
@@ -596,130 +738,4 @@ tm_polygons(col = "Mangrove_surface", group = "Annees_mangrove", alpha = 0.6, ti
 
 ```
 
-Piste : utilisation de rasters ? 
-
-## Pour aller plus loin
-
-Exemple d'intentation :
-
-```{r identation}
-#| eval: false 
-
-# Pas bien : difficile a lire
-if (a>0){
-b <- a^2
-if (b>4){
-c <- log(b)
-}else{
-c <- exp(b)
-}
-}else{
-b <- -a^2 + 3
-c <- NULL
-}
-
-# Bien : lisible (il suffit de faire CTRL+I)
-if (a>0){
-  b <- a^2
-  if (b>4){
-    c <- log(b)
-  }else{
-    c <- exp(b)
-  }
-}else{
-  b <- -a^2 + 3
-  c <- NULL
-}
-
-```
-
-Exemple d'opérateurs :
-
--   Opérateurs arithmétiques
-
-```{r arithmetique}
-
-#| eval: false 
-
-a <- 10
-b <- 5
-
-addition <- a + b  # Addition
-soustraction <- a - b  # Soustraction
-multiplication <- a * b  # Multiplication
-division <- a / b  # Division
-modulo <- a %% b  # Modulo
-exponentiation <- a ^ b  # Exponentiation
-division_entiere <- a %/% b  # Division entière
-
-```
-
--   Opérateurs de comparaison
-
-```{r comparaison}
-#| eval: false 
-
-x <- 10
-y <- 5
-
-egalite <- x == y  # Égalité
-difference <- x != y  # Différence
-inferieur <- x < y  # Inférieur à
-inferieur_egal <- x <= y  # Inférieur ou égal à
-superieur <- x > y  # Supérieur à
-superieur_egal <- x >= y  # Supérieur ou égal à
-
-```
-
--   Opérateurs logiques
-
-```{r logiques}
-#| eval: false 
-
-p <- TRUE
-q <- FALSE
-
-et_logique <- p & q  # ET logique
-ou_logique <- p | q  # OU logique
-non_logique <- !p  # NON logique
-
-```
-
--   Opérateurs d'affectation
-
-```{r affectation}
-#| eval: false 
-
-x <- 10  # Affectation simple
-y <- c(1, 2, 3)  # Affectation d'un vecteur
-
-```
-
--   Opérateurs de concaténation
-
-```{r concatenation}
-#| eval: false 
-
-prenom <- "John"
-nom <- "Doe"
-
-concatenation <- paste(prenom, nom)  # Concaténation de chaînes de caractères
-
-```
-
--   Opérateurs d'indexation
-
-```{r index}
-#| eval: false 
-
-vecteur <- c(1, 2, 3, 4, 5)
-matrice <- matrix(1:9, nrow = 3)
-liste <- list(1, "a", TRUE)
-
-element1 <- vecteur[2]  # Indexation d'un élément dans un vecteur
-sous_vecteur <- vecteur[2:4]  # Indexation d'un sous-vecteur
-element_matrice <- matrice[2, 3]  # Indexation d'un élément dans une matrice
-sous_matrice <- matrice[1:2, 2:3]  # Indexation d'une sous-matrice
-element_liste <- liste[[2]]  # Indexation d'un élément dans une liste
-
-```
+Piste : utilisation de rasters ?
