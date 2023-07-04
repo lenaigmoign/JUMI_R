@@ -32,26 +32,26 @@ bibliography: references.bib
 
 ## Prise en main de RStudio
 
--   Décompresser le fichier de données téléchargé dans un dossier de travail.\
--   Ouvrir RStudio\
+-   Décompresser le fichier de données téléchargé dans un dossier de travail.
+-   Ouvrir RStudio
 -   File \> New project \> Existing directory : sélectionner le dossier de travail
 
 ### Interface
 
-L"interface comporte quatre fenêtres :
+L'interface comporte quatre fenêtres :
 
 ![Fenêtre de l'interface utilisateur R studio (Source : ourednik.info)](Figures/R_interface_colored.png)
 
-A)  **Source** : pour éditer les fichiers scripts (R et autres langages)\
-B)  **Console** : où s'exécute le code et où on peut directement taper des commandes\
-C)  **Environnement** : qui rassemble des fonctionnalités pour suivre le fonctionnement de R\
+A)  **Source** : pour éditer les fichiers scripts (R et autres langages)
+B)  **Console** : où s'exécute le code et où on peut directement taper des commandes
+C)  **Environnement** : qui rassemble des fonctionnalités pour suivre le fonctionnement de R
 D)  **Explorateur** : vue sur les fichiers, libraries et rendus
 
 ### B.A. BA du langage R
 
-Sans entrer dans les détails, quelques notions élementaires pour ne pas être dérouté par du code
+Sans entrer dans les détails, quelques notions élementaires pour ne pas être (trop) déroutés par les lignes de codes qui vont suivre.
 
-On peut effectuer une opération directement.
+On peut effectuer une opération directement :
 
 ```{r}
 # Oprération réalisée directement
@@ -86,19 +86,19 @@ library(tidyverse, quietly = TRUE)
 
 ### Raccourcis clavier
 
-Il existe différents raccourcis clavier pour faciliter la mise en forme et l'exécution du code
+Il existe différents raccourcis clavier pour faciliter la mise en forme et l'exécution du code :
 
 ![Raccourcis clavier pratiques sur R studio](Figures/Raccourcis_clavier.JPG)
 
 ### Un mot sur les formats de documents
 
--   Des scripts (`mon_fichier.R`) qui exécutent du code\
+-   Des scripts (`mon_fichier.R`) qui exécutent du code
 -   Des notebooks quarto `mon_fichier.qmd` qui produisent en sortie :
     -   Des pages web ou des sites webs complets [par exemple @bedecarrats_impact_2022]
     -   Des pdf publiables (LaTeX) [par exemple @bedecarrats_tapping_2016]
     -   Des présentations format html, pdf/beamer ou pptx [par exemple @bedecarrats_prodiges_2022, voir [code source](https://github.com/fBedecarrats/prodiges-vertiges-satellitaire/blob/master/Presentation_Tany_Vao.qmd)]
-    -   Des documents Word\
--   Des applications inteactive (shiny)
+    -   Des documents Word
+-   Des applications interactives (shiny)
 
 ## Dans quels cas on utilise R ?
 
@@ -139,7 +139,6 @@ if (file.exists("data/WDPA/WDPA_Jun2023_SEN-shapefile.zip")) {
     WDPA_Senegal <- wdpa_fetch("Senegal", wait = TRUE, 
                           download_dir = "data/WDPA") 
 }
-
 ```
 
 ## Exploration des données disponibles sur les aires protégées
@@ -310,7 +309,7 @@ WDPA_Senegal <- init_portfolio(x = WDPA_Senegal,
 
 Une fois le portefeuille lancé, on peut récupérer les données de notre intérêt en ligne puis lancer le calcul d'indicateurs pour chaque observation de notre objet sf. Cela peut prendre un peu de temps en fonction du volume de données importées.
 
-### Acquisition des données de mangrove 
+### Acquisition des données de mangrove
 
 Jeu de données constitué par [Global Mangrove Watch](https://www.globalmangrovewatch.org) (GMW), dispositif de suivi animé par la Global Mangrove Alliance, qui associe notamment universités, ONG et le world Resource Institute. Il distribue des cartes de l'étendue des mangroves en 1996, pour chaque année entre 2007 et 2010, et pour chaque année entre 2015 et 2020.
 
@@ -347,12 +346,11 @@ tm_shape(mgv_senegal_07) +
   tm_fill(col = "darkgreen")
 ```
 
-
 ## Tri des données pour faciliter l'exploration
 
 ### Désimbrication des indicateurs
 
-Une fois que l'indicateur a été calculé individuellement pour tous les "actifs" du portefeuille, les données apparaîssent sous la forme d'une **colonne de liste imbriquée** à l'objet d'origine. Si on a plusieurs indicateurs, on aura plusieurs colonnes avec des listes ayant une, deux ou plusieurs variables.
+Une fois que l'indicateur a été calculé individuellement pour tous les "actifs" du portefeuille, s'il y a plusieurs années ou variables calculées, les données apparaîssent sous la forme d'une **colonne de liste imbriquée** à l'objet d'origine. Si on a plusieurs indicateurs, on aura plusieurs colonnes avec des listes ayant une, deux ou plusieurs variables.
 
 Par exemple, ceci est le contenu de la cellule "mangroves_area" de la deuxième ligne du tableau des aires protégées (correspondant au parc naturel du Delta du Saloum) :
 
