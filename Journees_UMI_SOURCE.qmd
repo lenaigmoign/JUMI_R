@@ -106,7 +106,7 @@ Il existe différents raccourcis clavier pour faciliter la mise en forme et l'ex
 
 ## Installation et chargement des librairies R
 
-Lors de l'ouverture d'un fichier mobilisant des librairies non encore installées, RStudio affiche dans un bandeau au-dessus dudit fichier une invitation à installer les librairies manquantes. Un moyen autre moyen simple d'installer une librairie est d'utiliser le menu "packages" dans le panneau d'exploration (en bas à droite). Les librairies peuvent sinon être installées avec la commande `install.packages(sf)` pour la librairie `sf` par exemple.
+Lors de l'ouverture d'un fichier mobilisant des librairies non encore installées, RStudio affiche dans un bandeau au-dessus dudit fichier une invitation à installer les librairies manquantes. Un autre moyen simple d'installer une librairie est d'utiliser le menu "packages" dans le panneau d'exploration (en bas à droite). Les librairies peuvent sinon être installées avec la commande `install.packages(sf)` pour la librairie `sf` par exemple.
 
 ```{r install_librairies}
 # Chargement des librairies nécessaires 
@@ -330,13 +330,20 @@ if (file.exists("WDPA_mapme_mangrove.rds")) {
 
 ## Carte des mangroves
 
+Nous allons maintenant récupérer les données brutes téléchargées pour le suivi des mangroves, pour les années 2007 et 2020. Nous les superoposons afin de visualiser les zones qui étaient couvertes de mangrove en 2007 et qui ne le sont plus en 2020. Nous allons focaliser l'analyse sur le Parc National du Delta du Saloum.
+
 ```{r carte_mangroves}
 #| fig-cap: "Perte de surfaces de mangrove entre 2007 et 2020 (Source: GMW)"
-#| eval: false
+
+# On filtre la base d'aires protégées pour garder le PN Delta du Saloum
+pn_saloum <- WDPA_Senegal %>%
+  filter(DESIG == "Parc National" & NAME == "Delta du Saloum")
 
 # Chargement des données de mangroves
-mgv_senegal_07 <- st_read("data/mapme_Senegal/gmw/gmw-extent_2007.gpkg")
-mgv_senegal_20 <- st_read("data/mapme_Senegal/gmw/gmw-extent_2020.gpkg")
+mgv_senegal_07 <- st_read("data/mapme_Senegal/gmw/gmw-extent_2007.gpkg") %>%
+  st_intersection(pn_saloum)
+mgv_senegal_20 <- st_read("data/mapme_Senegal/gmw/gmw-extent_2020.gpkg") %>%
+  st_intersection(pn_saloum)
 
 # Création d'une carte thématique 
 tmap_mode("view")
@@ -346,11 +353,11 @@ tm_shape(mgv_senegal_07) +
   tm_fill(col = "darkgreen")
 ```
 
-## Tri des données pour faciliter l'exploration
+## Exploitation des statistiques produites
 
-### Désimbrication des indicateurs
+### Des indicateurs par année "imbriqués" dans la base aires protégées
 
-Une fois que l'indicateur a été calculé individuellement pour tous les "actifs" du portefeuille, s'il y a plusieurs années ou variables calculées, les données apparaîssent sous la forme d'une **colonne de liste imbriquée** à l'objet d'origine. Si on a plusieurs indicateurs, on aura plusieurs colonnes avec des listes ayant une, deux ou plusieurs variables.
+Une fois que l'indicateur a été calculé individuellement pour toutes les aires protégées, les données apparaîssent sous la forme d'une **colonne de liste imbriquée** à dans chaque cellule de la colonne l'objet d'origine. Si on a plusieurs indicateurs, on aura plusieurs colonnes avec des listes ayant une, deux ou plusieurs variables.
 
 Par exemple, ceci est le contenu de la cellule "mangroves_area" de la deuxième ligne du tableau des aires protégées (correspondant au parc naturel du Delta du Saloum) :
 
@@ -362,11 +369,9 @@ WDPA_Senegal[["mangroves_area"]][[2]] %>%
   gt()
 ```
 
-Cette imbrication n'est pas toujours indispensable. Par exemple, pour les variables calculées ici (*couvert forestier et surface de mangrove*), on ne cherche qu'une valeur par observation. On va donc **désimbriquer** les données à l'aide de la fonction *unnest()*.
+Cette imbrication n'est pas toujours effectuée, si par exemple on n'a qu'une année. Par exemple, pour les variables calculées ici (*surface de mangrove*), on ne cherche qu'une valeur par observation. On va donc **désimbriquer** les données à l'aide de la fonction *unnest()* et ne garder qu'une seule année
 
 On doit aussi se rappeler que les aires protégées sont parfois composées de plusieurs polygones disjoints et que précédemment, pour l'utilisation de mapme.biodiversity, on a calculé chaque indicateur pour chaque polygone séparément. Pour chaque aire protégée, on va donc faire la moyenne de ces indicateurs, pondérée par la surface respective de chaque polygone.
-
-Nous appelerons ce tableau WDPA_terrain :
 
 ```{r desimbrication}
 # Désimbrication des données des colonnes calculées 
