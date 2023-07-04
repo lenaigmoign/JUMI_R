@@ -219,6 +219,8 @@ tm_shape(WDPA_Senegal) +
 Le package "mapme.biodiversity" facilite l'analyse de données statistiques sur les aires protégées partout dans le monde [@mapme.biodiversity]. Il permet l'**importation d'un nombre important de base de données et le calcul d'indicateurs associés relatifs à la biodiversité** qui peuvent être utilisés pour surveiller et évaluer l'efficacité des efforts de protection. Le processus est volontairement simple :
 
 ```{r diagram_mapme}
+#| fig-cap: "Processus de traitement avec mapme.biodiversity"
+
 mermaid("
 graph TB
     AA(Définition des polygones d'analyse)
