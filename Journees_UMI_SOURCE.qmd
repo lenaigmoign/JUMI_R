@@ -21,8 +21,6 @@ bibliography: references.bib
 
 ## Objectifs de la formation
 
-Faire des analyses spatiales avec R et notamment :
-
 1.  Prendre conscience du potentiel des données en open data
 2.  Comprendre la manière dont sont structurées les données spatio-temporelles
 3.  Entretenir un recul critique sur les données
@@ -333,6 +331,7 @@ if (file.exists("WDPA_mapme_mangrove.rds")) {
 
 ```{r carte_mangroves}
 #| fig-cap: "Perte de surfaces de mangrove entre 2007 et 2020 (Source: GMW)"
+#| eval: false
 
 # Chargement des données de mangroves
 mgv_senegal_07 <- st_read("data/mapme_Senegal/gmw/gmw-extent_2007.gpkg")
